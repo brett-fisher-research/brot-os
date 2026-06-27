@@ -1,0 +1,9 @@
+{
+  "name": "@claude-os/notify",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "description": "Generic one-way Telegram push notification. Reads TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID from the environment (injected from config/notify.env). Tracked & generic — almost any claude-os instance wants it."
+}

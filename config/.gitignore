@@ -1,4 +1,6 @@
-config/*
-!config/.gitignore
-!config/CLAUDE.md
-!config/*.example
+# Patterns are relative to this dir (config/). Ignore everything here except the
+# tracked templates and docs — real secrets (notify.env, cloudflare.env) stay out.
+*
+!.gitignore
+!CLAUDE.md
+!*.example
