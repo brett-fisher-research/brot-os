@@ -1,0 +1,4 @@
+config/*
+!config/.gitignore
+!config/CLAUDE.md
+!config/*.example
