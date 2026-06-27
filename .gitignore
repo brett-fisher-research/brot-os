@@ -3,3 +3,6 @@ node_modules/
 .DS_Store
 *.log
 HIVE.md
+
+# experiments/ is its own tenant repo (the dir IS the repo) — ignore wholesale
+/experiments/
