@@ -1,0 +1,38 @@
+/*
+ * platform-chrome.css — the shared visual convention for every platform surface
+ * (the home dashboard's own pages AND promoted experiments).
+ *
+ * Served once from the home app at /platform-chrome.css and reachable from any
+ * experiment (Caddy routes unmatched paths to _home). platform-sidebar.js injects
+ * a <link> to it on every surface, so a promoted experiment inherits the convention
+ * with ZERO per-app CSS — the same delivery model as the sidebar itself.
+ *
+ * Deliberately theme-INDEPENDENT: it defines its own colors/typography and does NOT
+ * use the host app's CSS variables, so the "← Home" link looks identical whether the
+ * app's accent is the dashboard blue or the bookshelf amber. Only `.platform-*`
+ * classes are touched, so it can't disturb a host app's own styles.
+ */
+
+/* Hamburger safe area — the single source of clearance for the sidebar's floating
+ * launcher (top-left). Every page on every sidebar surface renders its content inside
+ * a <main>, so indenting that <main>'s first child past the hamburger keeps the page's
+ * top element (a back link, a title, an in-app nav row) from sliding under it — with
+ * no per-app or per-page CSS. This is THE layout rule for the launcher's safe area. */
+main > :first-child {
+  padding-left: calc(env(safe-area-inset-left, 0px) + 44px);
+}
+
+/* "← Home" back link — the standard subpage affordance. Place it as the FIRST child
+ * of the page's <main> (so the rule above clears the hamburger for it too). */
+.platform-back {
+  display: inline-block;
+  margin: 4px 4px 14px;
+  color: #4c9aff; /* platform accent (blue) — the same on every surface */
+  font: 600 0.9rem/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.platform-back:active {
+  opacity: 0.6;
+}
