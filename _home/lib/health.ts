@@ -27,16 +27,24 @@ export async function readServiceHealth(): Promise<ServiceStatus[]> {
   const experiments = await readExperiments();
   // Infra first (the public path depends on these), then each experiment with its own service.
   // Static apps have no service of their own — Caddy file-serves them — so they're omitted here.
-  const units: Array<{ unit: string; label: string }> = [
-    { unit: 'cloudflared', label: 'Tunnel' },
-    { unit: 'caddy-experiments', label: 'Caddy' },
-    { unit: 'exp-home', label: 'Dashboard' },
+  // Each entry lists candidate unit names; the service is "up" if ANY candidate is active.
+  // claude-os unit naming isn't uniform: services are `exp-<slug>` (bookshelf, ideas, sketchpad)
+  // while experiments are `cos-<slug>` (frog-tour, knight-moves) — so check both. The dashboard
+  // itself runs as `claudeos-home`.
+  const entries: Array<{ units: string[]; label: string }> = [
+    { units: ['cloudflared'], label: 'Tunnel' },
+    { units: ['caddy-experiments'], label: 'Caddy' },
+    { units: ['claudeos-home'], label: 'Dashboard' },
     ...experiments
       .filter((e) => e.type !== 'static')
-      .map((e) => ({ unit: `exp-${e.slug}`, label: e.slug })),
+      .map((e) => ({ units: [`exp-${e.slug}`, `cos-${e.slug}`], label: e.slug })),
   ];
 
   return Promise.all(
-    units.map(async ({ unit, label }) => ({ unit, label, active: await isActive(unit) })),
+    entries.map(async ({ units, label }) => {
+      const results = await Promise.all(units.map(isActive));
+      const idx = results.findIndex(Boolean);
+      return { unit: idx >= 0 ? units[idx] : units[0], label, active: idx >= 0 };
+    }),
   );
 }

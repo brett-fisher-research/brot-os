@@ -101,7 +101,7 @@ export function Observability() {
               {!data.traffic.configured ? (
                 <p className="obs-hint">
                   Add a Cloudflare API token to{' '}
-                  <code>~/.config/claude-experiments/cloudflare.env</code> to see hits.
+                  <code>~/claude-os/config/cloudflare.env</code> to see hits.
                 </p>
               ) : data.traffic.error ? (
                 <p className="obs-hint">Couldn’t reach Cloudflare Analytics right now.</p>
