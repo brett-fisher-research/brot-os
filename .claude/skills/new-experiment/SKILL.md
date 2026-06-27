@@ -1,0 +1,106 @@
+---
+name: new-experiment
+description: Create a brand-new experiment from an idea. Use when the user says "/new-experiment", "create a new experiment", "spin up a project/app", "make me a <thing> app/website/game", or otherwise describes something new to build and host. Scaffolds the project into the experiments repo, runs it as a long-lived service, wires up a Tailscale URL, and prints it.
+argument-hint: "<describe what you want to build>"
+allowed-tools: Bash Read Write Edit WebFetch
+---
+
+# New experiment
+
+You are creating a new self-hosted experiment in `~/claude-os/experiments/`. Read
+`~/claude-os/CLAUDE.md`, `~/claude-os/experiments/CLAUDE.md`, and `~/claude-os/templates/PWA.md`
+before scaffolding — they define the routing/basePath/PWA invariants you MUST follow.
+
+`experiments/` is **ONE git repo** holding *many* self-contained experiments — not a repo per
+experiment. Scaffold into a new subdir `~/claude-os/experiments/<slug>/`; do NOT `git init` or
+`gh repo create` inside it.
+
+The user's idea is in `$ARGUMENTS`. Build it well, mobile-first, and end by printing the URL.
+
+**Building an experiment is a code change, so it rides on a PR.** Before scaffolding, invoke the
+**`/pr`** skill to guard against unsaved work, branch off an up-to-date `main` (e.g.
+`feat/<slug>`), and set up the commit-at-every-step discipline. Commit each increment as you go;
+don't push or open the PR here — that's `/raise`, then `/merge` once the user is happy.
+
+## Steps
+
+0. **Start the PR.** Invoke **`/pr`** with a `feat/<slug>` branch. Everything below happens on that
+   branch, committed step by step.
+
+1. **Pick a slug.** Kebab-case, short, unique. Check `jq -r '.experiments|keys[]'
+   ~/claude-os/registry.json` and `ls ~/claude-os/experiments/` to avoid collisions. If the idea
+   is ambiguous in a way that changes the build, ask ONE clarifying question; otherwise proceed.
+
+2. **Choose the tier:**
+   - **static** — pure HTML/CSS/JS with no backend (e.g. "hello world", a calculator, a
+     static teaching page). Fastest, lightest.
+   - **next** — anything interactive/stateful/full-stack, or when the user asks for it.
+     This is the default whenever in doubt.
+   - **worker** — a headless long-lived process with no web UI (a bot, a poller, a queue
+     consumer). No port, no Caddy route. Entry defaults to `experiments/<slug>/index.js`.
+   Keep the stack minimal; don't add dependencies the idea doesn't need.
+
+3. **Make the experiment dir — NO separate GitHub repo.** Experiments live together in the one
+   `experiments/` repo so they can iterate fast and share code via `packages/`. Just create
+   `~/claude-os/experiments/<slug>/` and build into it (do NOT `git init` inside it, do NOT
+   `gh repo create`). Shared logic (data fetchers, clients) goes in `packages/<name>/` as a
+   `"type": "module"` package and is imported by **relative path** (e.g.
+   `import { x } from '../../../packages/<name>/index.js'`) — never copied. An experiment
+   graduates to its own `apps/` repo later via `/promote-experiment`.
+
+4. **Scaffold.** (Run these from `~/claude-os/experiments/`.)
+   - **next:** `npx create-next-app@latest <slug> --ts --app --eslint --no-tailwind
+     --no-src-dir --use-npm --yes` (add Tailwind only if helpful). Then:
+     - Set `basePath: '/<slug>'` and `output: 'standalone'` in `next.config` (see
+       `~/claude-os/templates/next.config.snippet.js`).
+     - Add PWA per `templates/PWA.md`: copy `manifest.webmanifest`, `sw.js`,
+       `register-sw.tsx` from `~/claude-os/templates/` (substitute `@@SLUG@@`,
+       `@@NAME@@`, `@@SHORT@@`) into `public/` and the app; wire `<head>` metadata +
+       `<RegisterSW/>`; run `uv run ~/claude-os/templates/gen-icons.py --out
+       public --label <Initial>`.
+     - Build the actual feature. Put any in-app routes under the App Router as normal —
+       `next/link` auto-applies basePath. Make it mobile-first.
+   - **static:** write `index.html` + assets in `experiments/<slug>/` using **relative** paths;
+     add a `manifest.webmanifest` (scope/start_url `"./"`), `sw.js`, and icons
+     (`gen-icons.py --out experiments/<slug>`).
+   - **worker:** write `experiments/<slug>/index.js` (plain Node ESM, zero deps where possible)
+     and a minimal `package.json` with `"type": "module"`. Long-lived loop, no HTTP server. Read
+     any secrets from env (injected via `EnvironmentFile`). Put reusable fetch/client logic in
+     `packages/<name>/` and import it.
+
+4b. **Notifications.** Two ways to ping the phone (both use the shared Telegram secret, auto-
+   injected into every `exp-<slug>` service via `EnvironmentFile`):
+   - **One-way (any experiment):** in a **next** app, vendor the helper —
+     `cp ~/claude-os/templates/notify.ts experiments/<slug>/lib/notify.ts` — and
+     `await notify("…")` from a server route/action. (Vendoring keeps a Next standalone build
+     self-contained.) In shell/cron, call `~/claude-os/bin/notify.sh "…"`.
+   - **Two-way (commands):** the two-way Telegram bot lives in `services/` — add a `/command`
+     there rather than building a new bot. Don't run a second Telegram long-poller — only one
+     consumer of `getUpdates` may exist.
+
+5. **Register + run:**
+   ```bash
+   ~/claude-os/bin/register-experiment.sh <slug> next     # or: static | worker
+   # next: then build + start:
+   ~/claude-os/bin/rebuild-experiment.sh <slug>
+   # worker: register already started it; rebuild only after code changes.
+   ```
+
+6. **Verify:**
+   ```bash
+   curl -fsS http://127.0.0.1:<port>/<slug>/ >/dev/null && echo OK   # next
+   systemctl --user status exp-<slug> --no-pager | head -5           # next/static/worker
+   journalctl --user -u exp-<slug> -n 30 --no-pager                  # worker: confirm it runs
+   ```
+
+7. **Make sure everything is committed** on the PR branch from step 0 (the `experiments/` repo holds
+   it; no per-experiment repo). Per `/pr`, never leave uncommitted work when you hand back. Don't
+   push or open a PR here — the user runs **`/raise`** when they want it up, then **`/merge`** to
+   land it.
+
+8. **Finish:**
+   - **next/static:** print the URL prominently —
+     `https://intel-nuc.mullet-ostrich.ts.net/<slug>/` — and remind: "Open it on your phone
+     and use Share → Add to Home Screen to pin it."
+   - **worker:** there's no URL; report that the service is running and how to trigger it
+     (e.g. the bot command).
