@@ -17,7 +17,7 @@ Type=simple
 WorkingDirectory=%h/claude-os/_home
 ExecStart=/home/brett/.nvm/versions/node/v25.3.0/bin/node %h/claude-os/_home/.next/standalone/server.js
 Environment=NODE_ENV=production
-Environment=PORT=2990
+Environment=PORT=2999
 Environment=HOSTNAME=127.0.0.1
 Environment=BOOKSHELF_API=http://127.0.0.1:3010
 Environment=REGISTRY_API=http://127.0.0.1:4001
