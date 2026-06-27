@@ -1,0 +1,25 @@
+# Template for a per-experiment service. Generated into
+# ~/.config/systemd/user/exp-<slug>.service by bin/register-experiment.sh.
+# Placeholders (@@...@@) are substituted at generation time. Do not install this file directly.
+[Unit]
+Description=Experiment: @@SLUG@@
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@@APPDIR@@
+# Next.js standalone server (output: 'standalone'). Binds to localhost only;
+# Tailscale + Caddy handle external access.
+ExecStart=@@NODE@@ @@APPDIR@@/.next/standalone/server.js
+Environment=NODE_ENV=production
+Environment=PORT=@@PORT@@
+Environment=HOSTNAME=127.0.0.1
+# Shared notification secret (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID) so each
+# experiment's vendored lib/notify.ts can ping the phone. Leading '-' = optional.
+EnvironmentFile=-%h/claude-os/config/notify.env
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

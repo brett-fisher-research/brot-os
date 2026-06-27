@@ -1,0 +1,17 @@
+# Cloudflare Tunnel for the experiments workflow.
+# Installed to ~/.config/systemd/user/cloudflared.service by bin/setup-cloudflare-tunnel.sh.
+# Outbound-only: connects the NUC to Cloudflare's edge (no inbound ports, home IP hidden) and
+# forwards public requests to Caddy on :8080. Caddy host-routes each <slug>.brettfisher.dev.
+[Unit]
+Description=Cloudflare Tunnel (claude-os)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=@@CLOUDFLARED@@ tunnel --config %h/.cloudflared/config.yml run
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
