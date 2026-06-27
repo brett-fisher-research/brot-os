@@ -8,7 +8,8 @@ allowed-tools: Bash Read Write Edit WebFetch
 # Work on an experiment
 
 Read `~/claude-os/CLAUDE.md` first for the invariants you must preserve
-(basePath, PWA scope, mobile-first, never hand-edit Caddyfile/registry).
+(basePath, mobile-first, never hand-edit Caddyfile/registry; and, *if this experiment already
+has a PWA*, keep its manifest/service-worker scope at `/<slug>/`).
 
 **This is a code change, so it rides on a PR.** Before touching code, invoke the **`/pr`** skill to
 guard against unsaved work, branch off an up-to-date `main`, and set up the commit-at-every-step
@@ -31,8 +32,8 @@ discipline. Commit each increment as you go; don't push or open the PR here — 
 2. **Work in the repo:** `cd ~/claude-os/experiments/<slug>`. Make the changes on the `/pr`
    branch from step 0, committing each increment as you go. Preserve:
    - `basePath: '/<slug>'` and `output: 'standalone'` (Next)
-   - manifest/service-worker scope `/<slug>/`
    - mobile-first layout
+   - *if the experiment already ships a PWA*, its manifest/service-worker scope `/<slug>/`
    Do NOT edit `~/claude-os/Caddyfile` or `registry.json` by hand.
 
 3. **Rebuild + restart** the long-lived service:

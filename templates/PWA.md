@@ -1,11 +1,17 @@
-# Making a Next.js experiment installable (PWA) under a sub-path
+# OPT-IN: making an experiment installable (PWA) under a sub-path
 
-Every experiment is served at `https://intel-nuc.mullet-ostrich.ts.net/<slug>/`, so
-`basePath`, the manifest `scope`/`start_url`, the service-worker scope, and every
-hand-written asset URL must all equal `/<slug>/`. Get these four right and iOS "Add to
-Home Screen" → standalone works.
+> **PWA is opt-in, not the default.** New experiments are plain web apps opened through the
+> dashboard — no manifest, service worker, or icons are scaffolded by default. Follow this
+> guide **only when you want a specific experiment to be installable** ("Add to Home Screen"
+> → standalone). The template files in `~/claude-os/templates/` (`manifest.webmanifest`,
+> `sw.js`, `register-sw.tsx`, `gen-icons.py`) are the opt-in materials.
 
-## Steps the `/new-experiment` skill performs for a Next app
+If you do want this, every experiment is served at
+`https://intel-nuc.mullet-ostrich.ts.net/<slug>/`, so `basePath`, the manifest
+`scope`/`start_url`, the service-worker scope, and every hand-written asset URL must all
+equal `/<slug>/`. Get these four right and iOS "Add to Home Screen" → standalone works.
+
+## Steps to add a PWA to a Next app (opt-in)
 
 1. **next.config** — set `basePath: '/<slug>'` and `output: 'standalone'`
    (see `next.config.snippet.js`).
@@ -41,7 +47,7 @@ Home Screen" → standalone works.
 5. **Mobile-first** — design for a phone viewport first: large tap targets, no horizontal
    scroll, respect `env(safe-area-inset-*)`, `touch-action` where relevant.
 
-## Static experiments
+## Static experiments (opt-in)
 For a pure static experiment Caddy strips the `/<slug>/` prefix, so use **relative** asset
 paths (`./style.css`, `./app.js`) and a `manifest.webmanifest` with `start_url`/`scope`
 of `"./"` (or the explicit `/<slug>/`). Place `manifest.webmanifest`, `sw.js`, and icons

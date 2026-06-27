@@ -8,8 +8,10 @@ allowed-tools: Bash Read Write Edit WebFetch
 # New experiment
 
 You are creating a new self-hosted experiment in `~/claude-os/experiments/`. Read
-`~/claude-os/CLAUDE.md`, `~/claude-os/experiments/CLAUDE.md`, and `~/claude-os/templates/PWA.md`
-before scaffolding — they define the routing/basePath/PWA invariants you MUST follow.
+`~/claude-os/CLAUDE.md` and `~/claude-os/experiments/CLAUDE.md` before scaffolding — they
+define the routing/basePath invariants you MUST follow. An experiment is a **plain web app**
+accessed through the dashboard; it is **not a PWA by default**. (Installable-PWA support is an
+optional add-on — see `~/claude-os/templates/PWA.md` — only when the user asks for it.)
 
 `experiments/` is **ONE git repo** holding *many* self-contained experiments — not a repo per
 experiment. Scaffold into a new subdir `~/claude-os/experiments/<slug>/`; do NOT `git init` or
@@ -53,16 +55,14 @@ don't push or open the PR here — that's `/raise`, then `/merge` once the user 
      --no-src-dir --use-npm --yes` (add Tailwind only if helpful). Then:
      - Set `basePath: '/<slug>'` and `output: 'standalone'` in `next.config` (see
        `~/claude-os/templates/next.config.snippet.js`).
-     - Add PWA per `templates/PWA.md`: copy `manifest.webmanifest`, `sw.js`,
-       `register-sw.tsx` from `~/claude-os/templates/` (substitute `@@SLUG@@`,
-       `@@NAME@@`, `@@SHORT@@`) into `public/` and the app; wire `<head>` metadata +
-       `<RegisterSW/>`; run `uv run ~/claude-os/templates/gen-icons.py --out
-       public --label <Initial>`.
      - Build the actual feature. Put any in-app routes under the App Router as normal —
        `next/link` auto-applies basePath. Make it mobile-first.
-   - **static:** write `index.html` + assets in `experiments/<slug>/` using **relative** paths;
-     add a `manifest.webmanifest` (scope/start_url `"./"`), `sw.js`, and icons
-     (`gen-icons.py --out experiments/<slug>`).
+     - **Do NOT add a PWA by default** (no manifest, no service worker, no icon generation).
+       It's a plain web app opened through the dashboard. *Only if the user asks for it to be
+       installable*, follow the opt-in recipe in `~/claude-os/templates/PWA.md`.
+   - **static:** write `index.html` + assets in `experiments/<slug>/` using **relative** paths.
+     No manifest / service worker / icons by default — add them only if the user wants the page
+     installable (opt-in: `~/claude-os/templates/PWA.md`).
    - **worker:** write `experiments/<slug>/index.js` (plain Node ESM, zero deps where possible)
      and a minimal `package.json` with `"type": "module"`. Long-lived loop, no HTTP server. Read
      any secrets from env (injected via `EnvironmentFile`). Put reusable fetch/client logic in
@@ -100,7 +100,8 @@ don't push or open the PR here — that's `/raise`, then `/merge` once the user 
 
 8. **Finish:**
    - **next/static:** print the URL prominently —
-     `https://intel-nuc.mullet-ostrich.ts.net/<slug>/` — and remind: "Open it on your phone
-     and use Share → Add to Home Screen to pin it."
+     `https://intel-nuc.mullet-ostrich.ts.net/<slug>/` — and tell the user to open it through
+     the dashboard. (If they later want it installable to the home screen, mention it can be
+     made a PWA via `templates/PWA.md`.)
    - **worker:** there's no URL; report that the service is running and how to trigger it
      (e.g. the bot command).
