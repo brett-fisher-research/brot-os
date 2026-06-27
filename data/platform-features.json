@@ -1,0 +1,7 @@
+{
+  "features": [
+    { "label": "Home", "icon": "🏠", "href": "/" },
+    { "label": "Experiments", "icon": "🧪", "href": "/experiments/" },
+    { "label": "Ideas", "icon": "💡", "href": "/ideas/" }
+  ]
+}

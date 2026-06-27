@@ -1,0 +1,30 @@
+# claude-os service: home dashboard — Next.js standalone server (serves root '/').
+# Source of truth lives HERE (inside claude-os). Installed via the symlink model:
+#   systemctl --user enable --now ~/claude-os/_home/deploy/claudeos-home.service
+# (creates a symlink in ~/.config/systemd/user/ pointing back at this file).
+# Named claudeos-home (NOT exp-home) to avoid colliding with the live legacy exp-home unit
+# during the cutover; runs on its own port 2990. Asset copy (.next/static + public into
+# .next/standalone) is a build/deploy step, not done at start.
+# CLAUDE_EXPERIMENTS_ROOT pins the platform-features manifest + repo-root lookups to claude-os;
+# BOOKSHELF_API / REGISTRY_API point the dashboard's widgets at the standalone services.
+[Unit]
+Description=claude-os service: home dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/claude-os/_home
+ExecStart=/home/brett/.nvm/versions/node/v25.3.0/bin/node %h/claude-os/_home/.next/standalone/server.js
+Environment=NODE_ENV=production
+Environment=PORT=2990
+Environment=HOSTNAME=127.0.0.1
+Environment=BOOKSHELF_API=http://127.0.0.1:3010
+Environment=REGISTRY_API=http://127.0.0.1:4001
+Environment=CLAUDE_EXPERIMENTS_ROOT=%h/claude-os
+EnvironmentFile=-%h/claude-os/config/notify.env
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
