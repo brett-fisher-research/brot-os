@@ -22,7 +22,7 @@ The user's idea is in `$ARGUMENTS`. Build it well, mobile-first, and end by prin
 **Building an experiment is a code change, so it rides on a PR.** Before scaffolding, invoke the
 **`/pr`** skill to guard against unsaved work, branch off an up-to-date `main` (e.g.
 `feat/<slug>`), and set up the commit-at-every-step discipline. Commit each increment as you go;
-don't push or open the PR here — that's `/raise`, then `/merge` once the user is happy.
+`/pr` pushes and opens the PR, then `/merge` lands it once the user is happy.
 
 ## Steps
 
@@ -95,8 +95,7 @@ don't push or open the PR here — that's `/raise`, then `/merge` once the user 
 
 7. **Make sure everything is committed** on the PR branch from step 0 (the `experiments/` repo holds
    it; no per-experiment repo). Per `/pr`, never leave uncommitted work when you hand back. Don't
-   push or open a PR here — the user runs **`/raise`** when they want it up, then **`/merge`** to
-   land it.
+   `/pr` pushes and opens the PR; the user reviews it, then runs **`/merge`** to land it.
 
 8. **Finish:**
    - **next/static:** print the URL prominently —

@@ -29,8 +29,8 @@ moving code.
 
 **Promotion moves and edits code, so it rides on a PR.** Before moving anything, invoke the **`/pr`**
 skill to guard against unsaved work, branch off an up-to-date `main` (e.g. `feat/promote-<slug>`),
-and set up the commit-at-every-step discipline. Commit each increment as you go; don't push or open
-the PR here — that's `/raise`, then `/merge` once the user is happy.
+and set up the commit-at-every-step discipline. Commit each increment as you go; `/pr` pushes and
+opens the PR, then `/merge` lands it once the user is happy.
 
 ## Steps
 
@@ -142,8 +142,8 @@ the PR here — that's `/raise`, then `/merge` once the user is happy.
    it first and never wipe it.**
 
 8. **Make sure everything is committed** on the PR branch from step 0 (one repo). Per `/pr`, never
-   leave uncommitted work when you hand back. Don't push or open a PR here — the user runs
-   **`/raise`** when they want it up, then **`/merge`** to land it.
+   leave uncommitted work when you hand back. `/pr` pushes and opens the PR; the user reviews it,
+   then runs **`/merge`** to land it.
 
 ## Demote
 `bin/demote-experiment.sh <slug>` removes the sidebar manifest entry. The app stays a route segment
