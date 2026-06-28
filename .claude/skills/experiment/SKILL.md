@@ -13,8 +13,8 @@ has a PWA*, keep its manifest/service-worker scope at `/<slug>/`).
 
 **This is a code change, so it rides on a PR.** Before touching code, invoke the **`/pr`** skill to
 guard against unsaved work, branch off an up-to-date `main`, and set up the commit-at-every-step
-discipline. Commit each increment as you go; don't push or open the PR here — that's `/raise`, then
-`/merge` once the user is happy.
+discipline. Commit each increment as you go; `/pr` pushes and opens the PR, then `/merge` lands it
+once the user is happy.
 
 ## Steps
 
@@ -47,7 +47,7 @@ discipline. Commit each increment as you go; don't push or open the PR here — 
 4. **Verify the change** (run it, hit the route, or test) and report what you did.
 
 5. **Make sure everything is committed** on the PR branch before handing back (per `/pr`, never
-   leave uncommitted work when you yield). Don't push or open a PR here — the user runs **`/raise`**
-   when they want it up, then **`/merge`** to land it.
+   leave uncommitted work when you yield). `/pr` pushes and opens the PR; the user reviews it, then
+   runs **`/merge`** to land it.
 
 6. **Re-print the URL:** `https://intel-nuc.mullet-ostrich.ts.net/<slug>/`

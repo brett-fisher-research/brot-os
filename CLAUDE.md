@@ -56,6 +56,7 @@ apps/<name>/      promoted, productionized projects — each its own repo
 
 ## Code changes ride a PR
 
-All code changes in tracked claude-os and in each tenant repo go through the `/pr` → `/raise`
-→ `/merge` workflow. (Exception: bulk repo *creation* via `/swarm`, where brand-new repos are
+All code changes in tracked claude-os and in each tenant repo go through the `/pr` → `/merge`
+workflow (`/pr` branches, commits, pushes, and opens the PR; `/merge` lands it). (Exception: bulk
+repo *creation* via `/swarm`, where brand-new repos are
 committed + pushed directly — there is no base to PR against.)
