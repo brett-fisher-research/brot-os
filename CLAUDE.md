@@ -50,7 +50,8 @@ bin/ systemd/ templates/   the kernel: routing, services, publishing, notify, co
 config/           secrets + env (GITIGNORED) + *.example templates
 packages/<name>/  shared modules (notify is tracked & generic; others are tenant repos)
 services/<name>/  long-running daemons that own data behind an API — each its own repo
-experiments/      ONE repo holding many self-contained Next.js experiments (scratch/iterate)
+experiments/      its OWN separate repo (a tenant, NOT claude-os) holding many self-contained
+                  Next.js experiments — git work lands in that repo, never claude-os (scratch/iterate)
 apps/<name>/      promoted, productionized projects — each its own repo
 ```
 

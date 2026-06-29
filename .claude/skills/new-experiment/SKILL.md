@@ -13,21 +13,27 @@ define the routing/basePath invariants you MUST follow. An experiment is a **pla
 accessed through the dashboard; it is **not a PWA by default**. (Installable-PWA support is an
 optional add-on — see `~/claude-os/templates/PWA.md` — only when the user asks for it.)
 
-`experiments/` is **ONE git repo** holding *many* self-contained experiments — not a repo per
-experiment. Scaffold into a new subdir `~/claude-os/experiments/<slug>/`; do NOT `git init` or
-`gh repo create` inside it.
+`experiments/` is its **own separate git repo** (remote
+`https://github.com/brett-fisher-research/experiments.git`), gitignored by claude-os, holding
+*many* self-contained experiments — not a repo per experiment, and NOT part of the claude-os
+repo. Scaffold into a new subdir `~/claude-os/experiments/<slug>/`; do NOT `git init` or
+`gh repo create` inside it. All git work for an experiment (branch, commits, PR) happens in the
+`experiments` repo, never in claude-os.
 
 The user's idea is in `$ARGUMENTS`. Build it well, mobile-first, and end by printing the URL.
 
-**Building an experiment is a code change, so it rides on a PR.** Before scaffolding, invoke the
-**`/pr`** skill to guard against unsaved work, branch off an up-to-date `main` (e.g.
-`feat/<slug>`), and set up the commit-at-every-step discipline. Commit each increment as you go;
-`/pr` pushes and opens the PR, then `/merge` lands it once the user is happy.
+**Building an experiment is a code change, so it rides on a PR — in the `experiments` repo.**
+Before scaffolding, `cd ~/claude-os/experiments` and invoke the **`/pr`** skill there to guard
+against unsaved work, branch off that repo's up-to-date `main` (e.g. `feat/<slug>`), and set up
+the commit-at-every-step discipline. The branch, commits, and PR all live in the `experiments`
+repo, NOT claude-os. Commit each increment as you go; `/pr` pushes and opens the PR, then
+`/merge` lands it once the user is happy.
 
 ## Steps
 
-0. **Start the PR.** Invoke **`/pr`** with a `feat/<slug>` branch. Everything below happens on that
-   branch, committed step by step.
+0. **Start the PR — in the experiments repo.** `cd ~/claude-os/experiments`, then invoke **`/pr`**
+   with a `feat/<slug>` branch (off the `experiments` repo's `main`). Everything below happens on
+   that branch in the `experiments` repo, committed step by step — never on a claude-os branch.
 
 1. **Pick a slug.** Kebab-case, short, unique. Check `jq -r '.experiments|keys[]'
    ~/claude-os/registry.json` and `ls ~/claude-os/experiments/` to avoid collisions. If the idea
@@ -42,10 +48,11 @@ The user's idea is in `$ARGUMENTS`. Build it well, mobile-first, and end by prin
      consumer). No port, no Caddy route. Entry defaults to `experiments/<slug>/index.js`.
    Keep the stack minimal; don't add dependencies the idea doesn't need.
 
-3. **Make the experiment dir — NO separate GitHub repo.** Experiments live together in the one
-   `experiments/` repo so they can iterate fast and share code via `packages/`. Just create
-   `~/claude-os/experiments/<slug>/` and build into it (do NOT `git init` inside it, do NOT
-   `gh repo create`). Shared logic (data fetchers, clients) goes in `packages/<name>/` as a
+3. **Make the experiment dir — NO per-experiment GitHub repo.** Experiments live together in the
+   one `experiments` repo (its own repo, separate from claude-os) so they can iterate fast and
+   share code via `packages/`. Just create `~/claude-os/experiments/<slug>/` and build into it
+   (do NOT `git init` inside it, do NOT `gh repo create` — the surrounding `experiments` repo
+   already tracks it). Shared logic (data fetchers, clients) goes in `packages/<name>/` as a
    `"type": "module"` package and is imported by **relative path** (e.g.
    `import { x } from '../../../packages/<name>/index.js'`) — never copied. An experiment
    graduates to its own `apps/` repo later via `/promote-experiment`.
@@ -93,9 +100,10 @@ The user's idea is in `$ARGUMENTS`. Build it well, mobile-first, and end by prin
    journalctl --user -u exp-<slug> -n 30 --no-pager                  # worker: confirm it runs
    ```
 
-7. **Make sure everything is committed** on the PR branch from step 0 (the `experiments/` repo holds
-   it; no per-experiment repo). Per `/pr`, never leave uncommitted work when you hand back. Don't
-   `/pr` pushes and opens the PR; the user reviews it, then runs **`/merge`** to land it.
+7. **Make sure everything is committed** on the PR branch from step 0 — in the `experiments` repo
+   (it holds the experiment; no per-experiment repo, and nothing lands in claude-os). Per `/pr`,
+   never leave uncommitted work when you hand back. `/pr` pushes and opens the PR; the user
+   reviews it, then runs **`/merge`** to land it.
 
 8. **Finish:**
    - **next/static:** print the URL prominently —
