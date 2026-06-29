@@ -20,7 +20,7 @@ CF_TUNNEL="claude-experiments"      # named Cloudflare tunnel (existing tunnel o
 CADDY_PORT="8080"
 REDIR_PORT="8081"   # Caddy site that 301-redirects plain HTTP -> HTTPS
 PORT_BASE=3001
-HOME_PORT=2999      # reserved fixed port for the home dashboard (exp-home.service); below PORT_BASE so alloc_port never collides (3000 is taken by an unrelated app)
+HOME_PORT=2999      # reserved fixed port for the home dashboard (dashboard.service); below PORT_BASE so alloc_port never collides (3000 is taken by an unrelated app)
 GH_OWNER="bandrewfisher"
 
 # --- binary resolution (nvm-safe: resolve at call time, bake absolute path) ---
