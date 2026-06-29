@@ -87,17 +87,31 @@ repo, NOT claude-os. Commit each increment as you go; `/pr` pushes and opens the
 
 5. **Register + run:**
    ```bash
+   # static ONLY: register-experiment.sh resolves the served dir from apps/<slug>, so link it
+   # to the experiment dir first (same pattern as the existing coin-bandit static experiment):
+   ln -s ~/claude-os/experiments/<slug> ~/claude-os/apps/<slug>   # static only; gitignored, host-local
+
    ~/claude-os/bin/register-experiment.sh <slug> next     # or: static | worker
    # next: then build + start:
    ~/claude-os/bin/rebuild-experiment.sh <slug>
    # worker: register already started it; rebuild only after code changes.
    ```
+   Registering writes the **canonical** `~/claude-os/registry.json`. The dashboard's
+   experiments **listing** is served by the `experiments-registry` service (`:4001`), which the
+   installed unit points at that same canonical file (`REGISTRY_PATH=%h/claude-os/registry.json`).
+   So a successful `register-experiment.sh` is all it takes for the experiment to appear in the
+   dashboard — there is **no separate "add to the service" step**. (If the listing is ever stale,
+   the service is reading the wrong file: check `systemctl --user show exp-experiments-registry -p
+   Environment` for `REGISTRY_PATH`, then `systemctl --user restart exp-experiments-registry`.)
 
 6. **Verify:**
    ```bash
    curl -fsS http://127.0.0.1:<port>/<slug>/ >/dev/null && echo OK   # next
    systemctl --user status exp-<slug> --no-pager | head -5           # next/static/worker
    journalctl --user -u exp-<slug> -n 30 --no-pager                  # worker: confirm it runs
+
+   # next/static: confirm it actually shows in the dashboard listing (not just that it serves):
+   curl -fsS localhost:4001/registry | jq -r '.experiments | keys[]' | grep -qx <slug> && echo LISTED
    ```
 
 7. **Make sure everything is committed** on the PR branch from step 0 — in the `experiments` repo
