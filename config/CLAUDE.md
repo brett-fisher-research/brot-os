@@ -18,4 +18,4 @@ the values for *this* instance.
 | file | holds |
 |------|-------|
 | `notify.env`     | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` |
-| `cloudflare.env` | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID` (+ optional `CF_ANALYTICS_DAYS`) |
+| `cloudflare.env` | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `CF_WEB_ANALYTICS_SITE_TAG` (Web Analytics / RUM), `CLOUDFLARE_ZONE_ID` (+ optional `CF_ANALYTICS_DAYS`) |
