@@ -58,7 +58,7 @@ ensure_registry
     echo ""
   done
   # Landing page at the root. Once the home Next app is built (server.js exists), reverse-proxy
-  # to it on the reserved HOME_PORT; otherwise fall back to serving the static _home/index.html.
+  # to it on the reserved HOME_PORT; otherwise fall back to serving the static $HOME_DIR/index.html.
   # Keying off the build artifact makes the flip automatic and safe (no '/' 502 before it's up).
   if [ -f "$HOME_DIR/.next/standalone/server.js" ]; then
     echo "    handle {"
