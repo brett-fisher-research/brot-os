@@ -4,8 +4,8 @@ A virtual AI OS: a home-directory workspace driven almost entirely through Claud
 Skills are the commands, the kernel is the hosting machinery, projects live as self-contained
 repos in well-known directories.
 
-> Status — custom-first. Built for Brett's setup now; skill/kernel wording may be Brett-specific.
-> Genericizing into a clean open-source blueprint is deliberate later work.
+> Status — custom-first. Built for the user's setup now; skill/kernel wording may be
+> user-specific. Genericizing into a clean open-source blueprint is deliberate later work.
 
 ## Default workflow: brot 🥨
 
@@ -34,7 +34,8 @@ bodies, PR descriptions.
 
 - Dense, skimmable, high-signal. Section heads, bullets, nested bullets, tables — not paragraphs.
 - Cut every word that doesn't earn its place.
-- No `*` or `**` markdown emphasis — Brett dislikes it. Use headings, backticks, CAPS, or wording.
+- No `*` or `**` markdown emphasis — the user dislikes it. Use headings, backticks, CAPS, or wording.
+- Refer to the user as "the user" in all prose — never by name.
 - When in doubt, run it through `/razor`.
 
 ## The model (think Unix)
@@ -65,7 +66,7 @@ claude-os is the OS; your projects are userland.
 - Mechanism — code: tracked, generic. The kernel ships the how.
 - Config — anything host/account/secret-specific: injected, gitignored. `config/` supplies the
   what (your domain, tailnet, tokens).
-- When something is Brett-specific, push it toward `config/`, not into tracked code.
+- When something is user-specific, push it toward `config/`, not into tracked code.
 
 ## Language default
 
