@@ -7,6 +7,27 @@ projects live as self-contained repos inside well-known directories.
 > Status: **custom-first**. Built for Brett's setup right now; wording in skills/kernel may be
 > Brett-specific. Genericizing into a clean open-source blueprint is deliberate later work.
 
+## Default workflow: brot 🥨
+
+The **brot workflow is the default** for every non-trivial task in claude-os. Don't jump
+straight to code — run the loop:
+
+1. **Whiteboard first** — `/brot-board`. A permissive thinking space: explore the codebase,
+   search the web, weigh options, poke holes. No pressure to act; it never nudges toward a diff.
+   Start here whenever the goal isn't already locked.
+2. **Plan** — `/brot-plan`. Turn the converged thinking into a recursive, deterministic plan:
+   break the goal into pieces, recurse to atomic leaves, each with a specific verifiable test.
+   Writes a gitignored `BROT_PLAN.md`. Enters persistent brot mode.
+3. **Implement in a subagent** — `/brot-bot`. ONE background coding agent builds the plan
+   off-thread (code + test per leaf, ticks its own boxes, raises `/pr`). The main thread stays
+   the **PM**: it plans, relays status, chats, and merges — it never writes the code itself.
+4. **Done** — `/brot-done`. PM merges the PR after you approve, tears down background agents,
+   verifies every box is checked, deletes `BROT_PLAN.md`.
+
+Support: `/brot-dev` runs the hot-reloaded dev server once in a background agent (logs to a
+gitignored `.logs/`). The brot skills live in `~/.claude/skills/` (`brot-*`) — they are NOT
+vendored into this repo.
+
 ## The model (think Unix)
 
 | Unix | claude-os |
@@ -14,7 +35,7 @@ projects live as self-contained repos inside well-known directories.
 | `/bin`, coreutils | `.claude/skills/` — the commands you drive everything with |
 | kernel + init | `bin/` + `systemd/` — Caddy/systemd/tailscale/cloudflare render + publish |
 | `/etc` (config) | `config/` — secrets + env, **gitignored**, never tracked |
-| man pages / FHS | per-directory `CLAUDE.md` blueprints |
+| man pages / FHS | this root `CLAUDE.md` — the single blueprint (see Layout) |
 | shared libs | `packages/` |
 | daemons | `services/` |
 | installed programs | `apps/` |
@@ -24,8 +45,7 @@ projects live as self-contained repos inside well-known directories.
 ## What this repo tracks vs. doesn't
 
 `claude-os` tracks **only the OS layer**: skills, the kernel (`bin/`, `systemd/`, `templates/`),
-the per-directory `CLAUDE.md` blueprints, the generic `packages/notify`, and `config/*.example`
-templates. **Everything else is a tenant** — its own git repo living inside a container dir,
+this root `CLAUDE.md`, the generic `packages/notify`, and `config/*.example` templates. **Everything else is a tenant** — its own git repo living inside a container dir,
 **gitignored** by claude-os (`*` + `!.gitignore` + `!CLAUDE.md` per dir; `packages/` also keeps
 `notify/`). No submodules. claude-os is the OS; your projects are userland.
 
