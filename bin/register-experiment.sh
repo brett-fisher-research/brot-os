@@ -46,6 +46,7 @@ elif [ "$type" = "worker" ]; then
     -e "s|@@APPDIR@@|$app_dir|g" \
     -e "s|@@NODE@@|$node|g" \
     -e "s|@@ENTRY@@|$entry|g" \
+    -e "s|@@ROOT@@|$ROOT|g" \
     "$SYSTEMD_SRC/worker@.template" > "$unit"
   systemctl --user daemon-reload
   systemctl --user enable --now "exp-$slug.service"
@@ -70,6 +71,7 @@ else
     -e "s|@@APPDIR@@|$app_dir|g" \
     -e "s|@@NODE@@|$node|g" \
     -e "s|@@PORT@@|$port|g" \
+    -e "s|@@ROOT@@|$ROOT|g" \
     "$SYSTEMD_SRC/exp@.template" > "$unit"
 
   systemctl --user daemon-reload
