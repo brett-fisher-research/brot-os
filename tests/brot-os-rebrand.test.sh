@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Asserts the string-level rebrand to brot-os: package scope, env var, and that the
+# kernel/systemd/template/test surface carries no old-name strings.
+set -u
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+# Build the old-name patterns via concatenation so this file never contains the
+# contiguous literal (keeps the tree-wide acceptance guard able to scan tests too).
+OLD='claude''-os'
+SCOPE_OLD='@claude''-os'
+ENV_OLD='CLAUDE_OS''_ROOT'
+
+pass=0; fail=0
+ok()  { pass=$((pass+1)); printf '  ok   - %s\n' "$1"; }
+bad() { fail=$((fail+1)); printf '  FAIL - %s\n' "$1"; }
+check(){ if eval "$2"; then ok "$1"; else bad "$1"; fi; }
+
+# Package scope.
+check "package.json name is @brot-os/notify" \
+  'grep -q "\"name\": \"@brot-os/notify\"" packages/notify/package.json'
+check "no old package scope under packages/notify" \
+  '[ "$(grep -rl "$SCOPE_OLD" packages/notify | wc -l)" -eq 0 ]'
+
+# Env var override.
+check "BROT_OS_ROOT present in lib.sh" 'grep -q "BROT_OS_ROOT" bin/lib.sh'
+check "old root env var absent in lib.sh" '! grep -q "$ENV_OLD" bin/lib.sh'
+
+# Non-doc string surface is clean (case-insensitive).
+for d in systemd templates bin tests; do
+  check "no old name under $d/" \
+    "[ \"\$(grep -rIil \"\$OLD\" $d | wc -l)\" -eq 0 ]"
+done
+
+# os-notify test now asserts a brot-os path.
+check "os-notify test asserts a brot-os path" \
+  'grep -q "BROT_OS_ROOT/services/telegram-bot" tests/os-notify-skill.test.sh'
+
+printf '\n%d passed, %d failed\n' "$pass" "$fail"
+[ "$fail" -eq 0 ]
