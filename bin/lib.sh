@@ -7,7 +7,6 @@ ROOT="${CLAUDE_OS_ROOT:-$HOME/claude-os}"
 CONFIG_DIR="$ROOT/config"   # the /etc of claude-os: secrets + env (gitignored)
 APPS_DIR="$ROOT/apps"
 REGISTRY="$ROOT/registry.json"
-FEATURES="$ROOT/data/platform-features.json"  # platform sidebar manifest
 CADDYFILE="$ROOT/Caddyfile"
 HOME_DIR="$ROOT/apps/dashboard"
 TEMPLATES_DIR="$ROOT/templates"
@@ -102,45 +101,6 @@ reg_set_public() { # reg_set_public <slug> <true|false>
 reg_is_public() { # reg_is_public <slug> -> exit 0 if publicly hosted
   ensure_registry
   [ "$(jq -r --arg s "$1" '.experiments[$s].public // false' "$REGISTRY")" = "true" ]
-}
-
-# --- platform sidebar manifest (data/platform-features.json) ---
-# Drives the platform sidebar: built-in pages + promoted experiments. Kept separate
-# from the registry (which is hosting mechanics) and mutated only through these
-# helpers so the home dashboard, the bin scripts, and the sidebar stay in sync.
-ensure_features() {
-  [ -f "$FEATURES" ] && return
-  mkdir -p "$(dirname "$FEATURES")"
-  cat > "$FEATURES" <<'JSON'
-{
-  "features": [
-    { "label": "Home", "icon": "🏠", "href": "/" },
-    { "label": "Experiments", "icon": "🧪", "href": "/experiments/" },
-    { "label": "Ideas", "icon": "💡", "href": "/ideas/" }
-  ]
-}
-JSON
-}
-
-feat_has() { # feat_has <slug> -> exit 0 if the slug is already a promoted feature
-  ensure_features
-  [ "$(jq -r --arg s "$1" 'any(.features[]; .slug == $s)' "$FEATURES")" = "true" ]
-}
-
-# feat_add <slug> <label> <icon> <href> — upsert a promoted experiment (dedupe by slug).
-feat_add() {
-  ensure_features
-  local slug="$1" label="$2" icon="$3" href="$4"
-  jq --arg s "$slug" --arg l "$label" --arg i "$icon" --arg h "$href" \
-     '.features = ((.features // []) | map(select(.slug != $s)))
-        + [{label:$l, icon:$i, href:$h, slug:$s}]' \
-     "$FEATURES" > "$FEATURES.tmp" && mv "$FEATURES.tmp" "$FEATURES"
-}
-
-feat_remove() { # feat_remove <slug>
-  ensure_features
-  jq --arg s "$1" '.features |= map(select(.slug != $s))' \
-     "$FEATURES" > "$FEATURES.tmp" && mv "$FEATURES.tmp" "$FEATURES"
 }
 
 log() { printf '\033[1;36m[experiments]\033[0m %s\n' "$*" >&2; }
