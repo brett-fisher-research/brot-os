@@ -1,18 +1,18 @@
-// @claude-os/notify — one-way push to your phone via Telegram.
+// @brot-os/notify — one-way push to your phone via Telegram.
 //
 // Generic, configurable notification primitive. The ONLY shared resource is the
 // secret, read from the environment at runtime:
 //   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 //
 // On the NUC these are injected into each systemd --user service from
-// ~/claude-os/config/notify.env (via EnvironmentFile=). On another host, set
+// the host's config/notify.env (via EnvironmentFile=). On another host, set
 // the two env vars however that host injects config — the code never hardcodes
 // a token or a path.
 //
 // Server-side only (needs the bot token). Call from API routes / server actions
 // / route handlers / workers — never from a client component.
 //
-//   import { notify } from "@claude-os/notify";
+//   import { notify } from "@brot-os/notify";
 //   await notify("Job finished ✅");
 //   await notify("Body line", { title: "Build" });
 

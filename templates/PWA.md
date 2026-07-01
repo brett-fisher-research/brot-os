@@ -3,7 +3,7 @@
 > **PWA is opt-in, not the default.** New experiments are plain web apps opened through the
 > dashboard — no manifest, service worker, or icons are scaffolded by default. Follow this
 > guide **only when you want a specific experiment to be installable** ("Add to Home Screen"
-> → standalone). The template files in `~/claude-os/templates/` (`manifest.webmanifest`,
+> → standalone). The template files in `templates/` (`manifest.webmanifest`,
 > `sw.js`, `register-sw.tsx`, `gen-icons.py`) are the opt-in materials.
 
 If you do want this, every experiment is served at

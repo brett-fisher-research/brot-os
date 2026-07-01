@@ -6,7 +6,7 @@
 //   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 //
 // On the NUC these are loaded into each exp-<slug>.service from
-// ~/claude-os/config/notify.env. If this repo moves to another host,
+// the host's config/notify.env. If this repo moves to another host,
 // just set those two env vars there.
 //
 // Server-side only (needs the bot token). Call from API routes / server

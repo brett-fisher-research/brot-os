@@ -13,7 +13,7 @@ WorkingDirectory=@@APPDIR@@
 ExecStart=@@NODE@@ @@APPDIR@@/@@ENTRY@@
 Environment=NODE_ENV=production
 # Shared secrets (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID, etc.). Leading '-' = optional.
-EnvironmentFile=-%h/claude-os/config/notify.env
+EnvironmentFile=-@@ROOT@@/config/notify.env
 Restart=always
 RestartSec=5
 

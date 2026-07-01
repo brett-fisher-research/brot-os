@@ -1,4 +1,4 @@
-# claude-os
+# brot-os
 
 A virtual AI OS: a home-directory workspace driven almost entirely through Claude Code skills.
 Skills are the commands, the kernel is the hosting machinery, projects live as self-contained
@@ -11,7 +11,7 @@ repos in well-known directories.
 
 ALWAYS start in brot board mode. No exceptions. Every session, every task begins with
 `/brot-board` before any research, planning, or code — no matter how small or well-defined the
-ask looks. Open the board first. The brot loop is the default for all work in claude-os:
+ask looks. Open the board first. The brot loop is the default for all work in brot-os:
 
 - Whiteboard — `/brot-board`. Mandatory entry point. Permissive thinking space: explore the
   codebase, search the web, weigh options, poke holes. Never nudges toward a diff. Leave only
@@ -40,7 +40,7 @@ bodies, PR descriptions.
 
 ## The model (think Unix)
 
-| Unix | claude-os |
+| Unix | brot-os |
 |------|-----------|
 | `/bin`, coreutils | `.claude/skills/` — the commands you drive everything with |
 | kernel + init | `bin/` + `systemd/` — Caddy/systemd/tailscale/cloudflare render + publish |
@@ -54,12 +54,12 @@ bodies, PR descriptions.
 
 ## What this repo tracks vs. doesn't
 
-claude-os tracks only the OS layer: skills, the kernel (`bin/`, `systemd/`, `templates/`), this
+brot-os tracks only the OS layer: skills, the kernel (`bin/`, `systemd/`, `templates/`), this
 root `CLAUDE.md`, the generic `packages/notify`, and `config/*.example` templates.
 
-Everything else is a tenant — its own git repo inside a container dir, gitignored by claude-os
+Everything else is a tenant — its own git repo inside a container dir, gitignored by brot-os
 (`*` + `!.gitignore` + `!CLAUDE.md` per dir; `packages/` also keeps `notify/`). No submodules.
-claude-os is the OS; your projects are userland.
+brot-os is the OS; your projects are userland.
 
 ## Mechanism vs. config (the core discipline)
 
@@ -81,12 +81,12 @@ bin/ systemd/ templates/   the kernel: routing, services, publishing, notify, co
 config/           secrets + env (GITIGNORED) + *.example templates
 packages/<name>/  shared modules (notify is tracked & generic; others are tenant repos)
 services/<name>/  long-running daemons that own data behind an API — each its own repo
-experiments/      its OWN separate repo (a tenant, NOT claude-os) holding many self-contained
-                  Next.js experiments — git work lands in that repo, never claude-os (scratch/iterate)
+experiments/      its OWN separate repo (a tenant, NOT brot-os) holding many self-contained
+                  Next.js experiments — git work lands in that repo, never brot-os (scratch/iterate)
 apps/<name>/      promoted, productionized projects — each its own repo
 ```
 
 ## Code changes ride a PR
 
-All code changes in tracked claude-os and in each tenant repo go through `/pr` → `/merge`
+All code changes in tracked brot-os and in each tenant repo go through `/pr` → `/merge`
 (`/pr` branches, commits, pushes, opens the PR; `/merge` lands it).

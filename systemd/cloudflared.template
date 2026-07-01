@@ -3,7 +3,7 @@
 # Outbound-only: connects the NUC to Cloudflare's edge (no inbound ports, home IP hidden) and
 # forwards public requests to Caddy on :8080. Caddy host-routes each <slug>.brettfisher.dev.
 [Unit]
-Description=Cloudflare Tunnel (claude-os)
+Description=Cloudflare Tunnel (brot-os)
 After=network-online.target
 Wants=network-online.target
 

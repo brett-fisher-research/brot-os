@@ -1,4 +1,4 @@
-// @claude-os/notify — one-way push to your phone via Telegram.
+// @brot-os/notify — one-way push to your phone via Telegram.
 //
 // Runtime ESM build (kept in lockstep with index.ts) so the package works as a
 // `file:` dependency inside Next standalone builds, which can't transpile a bare
@@ -7,7 +7,7 @@
 //
 // The ONLY shared resource is the secret, read from the environment at runtime:
 //   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
-// On the NUC these are injected from ~/claude-os/config/notify.env via systemd
+// On the NUC these are injected from the host's config/notify.env via systemd
 // EnvironmentFile=. The code never hardcodes a token or a path.
 //
 // Server-side only (needs the bot token).
