@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Regenerate _home/index.html: a mobile-first index of all experiments.
+# Regenerate $HOME_DIR/index.html: a mobile-first index of all experiments.
 source "$(dirname "$(readlink -f "$0")")/lib.sh"
 
 ensure_registry
 
-# Retired once _home/ is a Next.js dashboard: it reads the registry at request time, so there's
+# Retired once the home dashboard is a Next.js app: it reads the registry at request time, so there's
 # no static index.html to regenerate. Existing callers can keep invoking this harmlessly.
 if [ -f "$HOME_DIR/package.json" ] && grep -q '"next"' "$HOME_DIR/package.json"; then
   log "Home is a Next app; static landing retired (dashboard reads registry at runtime)."
