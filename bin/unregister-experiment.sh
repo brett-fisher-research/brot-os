@@ -3,10 +3,10 @@
 # unit, drop its registry entry, and re-render Caddy (so its /<slug>/* route
 # disappears). The reverse of register-experiment.sh.
 #
-# Used when an experiment is PROMOTED into the home dashboard (moved to
+# Used when an experiment is folded into the home dashboard (moved to
 # _home/app/<slug>/): it no longer runs as its own service on its own port —
-# Caddy's root fallback serves /<slug>/* from _home instead. The app source move
-# is done by the /promote-experiment skill; this script owns the teardown.
+# Caddy's root fallback serves /<slug>/* from _home instead. This script owns
+# only the teardown; the app source move is handled separately.
 #
 # Usage: unregister-experiment.sh <slug>
 #

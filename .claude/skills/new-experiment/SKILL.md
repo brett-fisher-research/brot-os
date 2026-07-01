@@ -55,7 +55,7 @@ repo, NOT claude-os. Commit each increment as you go; `/pr` pushes and opens the
    already tracks it). Shared logic (data fetchers, clients) goes in `packages/<name>/` as a
    `"type": "module"` package and is imported by **relative path** (e.g.
    `import { x } from '../../../packages/<name>/index.js'`) — never copied. An experiment
-   graduates to its own `apps/` repo later via `/promote-experiment`.
+   graduates to its own `apps/` repo later by hand.
 
 4. **Scaffold.** (Run these from `~/claude-os/experiments/`.)
    - **next:** `npx create-next-app@latest <slug> --ts --app --eslint --no-tailwind
