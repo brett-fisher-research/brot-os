@@ -9,12 +9,14 @@ projects live as self-contained repos inside well-known directories.
 
 ## Default workflow: brot 🥨
 
-The **brot workflow is the default** for every non-trivial task in claude-os. Don't jump
-straight to code — run the loop:
+**ALWAYS start in brot board mode — no exceptions.** Every session, every task begins with
+`/brot-board`, before any research, planning, or code. No matter how small or well-defined the
+ask looks, open the board first. The **brot workflow is the default** for all work in claude-os;
+run the full loop:
 
-1. **Whiteboard first** — `/brot-board`. A permissive thinking space: explore the codebase,
-   search the web, weigh options, poke holes. No pressure to act; it never nudges toward a diff.
-   Start here whenever the goal isn't already locked.
+1. **Whiteboard first** — `/brot-board`. The mandatory entry point. A permissive thinking space:
+   explore the codebase, search the web, weigh options, poke holes. No pressure to act; it never
+   nudges toward a diff. Leave the board only when the user moves to `/brot-plan`.
 2. **Plan** — `/brot-plan`. Turn the converged thinking into a recursive, deterministic plan:
    break the goal into pieces, recurse to atomic leaves, each with a specific verifiable test.
    Writes a gitignored `BROT_PLAN.md`. Enters persistent brot mode.
@@ -55,6 +57,13 @@ Code is **mechanism** (tracked, generic). Anything specific to a host/account/se
 **config** (injected, gitignored). The kernel ships the *how*; `config/` supplies the *what*
 (your domain, your tailnet, your tokens). When something is Brett-specific, push it toward
 `config/`, not into tracked code.
+
+## Prose style: razor
+
+**All prose is written in razor style — no exceptions.** Chat replies, docs, READMEs, plans,
+commit bodies, PR descriptions: dense, skimmable, high-signal. Section heads, bullets, nested
+bullets, tables — not verbose paragraphs. Cut every word that doesn't earn its place. When in
+doubt, run it through `/razor`.
 
 ## Language default
 
