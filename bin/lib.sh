@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Shared helpers for the claude-os workflow.
+# Shared helpers for the brot-os workflow.
 # Source this from other scripts:  source "$(dirname "$0")/lib.sh"
 set -euo pipefail
 
-ROOT="${CLAUDE_OS_ROOT:-$HOME/claude-os}"
-CONFIG_DIR="$ROOT/config"   # the /etc of claude-os: secrets + env (gitignored)
+# Self-locate the repo root so brot-os installs at any path. Override with BROT_OS_ROOT.
+ROOT="${BROT_OS_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+CONFIG_DIR="$ROOT/config"   # the /etc of brot-os: secrets + env (gitignored)
 APPS_DIR="$ROOT/apps"
 REGISTRY="$ROOT/registry.json"
 CADDYFILE="$ROOT/Caddyfile"

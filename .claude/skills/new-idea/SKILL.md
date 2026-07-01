@@ -7,9 +7,9 @@ allowed-tools: Bash Read Write
 
 # New idea
 
-Save an idea into the backlog at `~/claude-os/data/feature-ideas/<slug>.md`. The home
+Save an idea into the backlog at `$BROT_OS_ROOT/data/feature-ideas/<slug>.md`. The home
 dashboard reads this directory at request time, so the idea appears at `/ideas/<slug>` with no
-rebuild. See `~/claude-os/data/feature-ideas/README.md` for the schema.
+rebuild. See `$BROT_OS_ROOT/data/feature-ideas/README.md` for the schema.
 
 The idea is in `$ARGUMENTS`. If invoked bare, capture the idea from the recent conversation.
 
@@ -17,7 +17,7 @@ The idea is in `$ARGUMENTS`. If invoked bare, capture the idea from the recent c
 
 1. **Pick a slug.** Kebab-case, short, unique. Check for collisions:
    ```bash
-   ls ~/claude-os/data/feature-ideas/
+   ls $BROT_OS_ROOT/data/feature-ideas/
    ```
    If the slug exists, either update that file (if it's the same idea) or pick a new slug.
 
@@ -27,7 +27,7 @@ The idea is in `$ARGUMENTS`. If invoked bare, capture the idea from the recent c
    - `category: experiment` — an app/experiment to build later.
    - `status: idea` by default (use `researching` if it already has substantial research).
 
-3. **Write** `~/claude-os/data/feature-ideas/<slug>.md` with full frontmatter and a
+3. **Write** `$BROT_OS_ROOT/data/feature-ideas/<slug>.md` with full frontmatter and a
    structured body. Use today's date for `created` (get it with `date +%F`):
    ```markdown
    ---

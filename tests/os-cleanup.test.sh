@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # platform-features cleanup tests: verify the platform-features manifest and the
-# promote/demote-experiment flow are fully removed from the claude-os OS layer,
+# promote/demote-experiment flow are fully removed from the brot-os OS layer,
 # with no dangling references and all bin/*.sh still parse-clean.
 set -u
 

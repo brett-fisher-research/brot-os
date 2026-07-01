@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# One-time host setup for the claude-os workflow.
+# One-time host setup for the brot-os workflow.
 # Safe to re-run (idempotent). Run AFTER the prerequisites in SETUP.md
 # (Tailscale HTTPS enabled, caddy + jq installed, claude logged in, linger enabled).
 source "$(dirname "$(readlink -f "$0")")/lib.sh"
 
-log "Bootstrapping claude-os at $ROOT"
+log "Bootstrapping brot-os at $ROOT"
 
 # 1. Structure + registry + initial Caddyfile + landing page.
 mkdir -p "$APPS_DIR" "$HOME_DIR" "$TEMPLATES_DIR" "$SYSTEMD_DEST"
@@ -16,9 +16,10 @@ ensure_registry
 caddy="$(caddy_bin)"; claude="$(claude_bin)"; nodedir="$(dirname "$(node_bin)")"
 [ -x "$caddy" ] || log "WARNING: caddy not found at '$caddy' — install it (see SETUP.md)"
 
-sed -e "s|@@CADDY@@|$caddy|g" \
+# @@ROOT@@ is the install dir, injected here so units never bake a fixed path.
+sed -e "s|@@CADDY@@|$caddy|g" -e "s|@@ROOT@@|$ROOT|g" \
   "$SYSTEMD_SRC/caddy-experiments.service" > "$SYSTEMD_DEST/caddy-experiments.service"
-sed -e "s|@@CLAUDE@@|$claude|g" -e "s|@@NODEDIR@@|$nodedir|g" \
+sed -e "s|@@CLAUDE@@|$claude|g" -e "s|@@NODEDIR@@|$nodedir|g" -e "s|@@ROOT@@|$ROOT|g" \
   "$SYSTEMD_SRC/claude-remote.service" > "$SYSTEMD_DEST/claude-remote.service"
 
 systemctl --user daemon-reload
@@ -51,4 +52,4 @@ log "Done. Status:"
 systemctl --user --no-pager status caddy-experiments claude-remote 2>/dev/null | grep -E "Active:|●" || true
 echo
 log "Open $BASE_URL/ from a tailnet device to confirm the landing page loads."
-log "Find the 'claude-os' session in the Claude app -> Code to drive it from your phone."
+log "Find the 'brot-os' session in the Claude app -> Code to drive it from your phone."

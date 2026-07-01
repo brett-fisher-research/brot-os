@@ -11,7 +11,9 @@
 # rebuild scripts, systemd) can detect a missed notification.
 set -euo pipefail
 
-ENV_FILE="${NOTIFY_ENV_FILE:-$HOME/claude-os/config/notify.env}"
+# Resolve ROOT (self-locating; honours BROT_OS_ROOT) so the env file follows the install.
+source "$(dirname "$(readlink -f "$0")")/lib.sh"
+ENV_FILE="${NOTIFY_ENV_FILE:-$CONFIG_DIR/notify.env}"
 if [[ -z "${TELEGRAM_BOT_TOKEN:-}" || -z "${TELEGRAM_CHAT_ID:-}" ]] && [[ -f "$ENV_FILE" ]]; then
   set -a; source "$ENV_FILE"; set +a
 fi

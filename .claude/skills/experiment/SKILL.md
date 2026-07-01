@@ -7,7 +7,7 @@ allowed-tools: Bash Read Write Edit WebFetch
 
 # Work on an experiment
 
-Read `~/claude-os/CLAUDE.md` first for the invariants you must preserve
+Read `$BROT_OS_ROOT/CLAUDE.md` first for the invariants you must preserve
 (basePath, mobile-first, never hand-edit Caddyfile/registry; and, *if this experiment already
 has a PWA*, keep its manifest/service-worker scope at `/<slug>/`).
 
@@ -25,20 +25,20 @@ once the user is happy.
    ask which one:
    ```bash
    jq -r '.experiments | to_entries[] | "\(.key)  (\(.value.type))  \(.value.repo)"' \
-     ~/claude-os/registry.json
+     $BROT_OS_ROOT/registry.json
    ```
    Use AskUserQuestion if it's unclear which one they mean.
 
-2. **Work in the repo:** `cd ~/claude-os/experiments/<slug>`. Make the changes on the `/pr`
+2. **Work in the repo:** `cd $BROT_OS_ROOT/experiments/<slug>`. Make the changes on the `/pr`
    branch from step 0, committing each increment as you go. Preserve:
    - `basePath: '/<slug>'` and `output: 'standalone'` (Next)
    - mobile-first layout
    - *if the experiment already ships a PWA*, its manifest/service-worker scope `/<slug>/`
-   Do NOT edit `~/claude-os/Caddyfile` or `registry.json` by hand.
+   Do NOT edit `$BROT_OS_ROOT/Caddyfile` or `registry.json` by hand.
 
 3. **Rebuild + restart** the long-lived service:
    ```bash
-   ~/claude-os/bin/rebuild-experiment.sh <slug>
+   $BROT_OS_ROOT/bin/rebuild-experiment.sh <slug>
    ```
    (Static experiments just re-render; no build.) Check it came back:
    `systemctl --user status exp-<slug> --no-pager | head -5` and

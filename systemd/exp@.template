@@ -17,7 +17,7 @@ Environment=PORT=@@PORT@@
 Environment=HOSTNAME=127.0.0.1
 # Shared notification secret (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID) so each
 # experiment's vendored lib/notify.ts can ping the phone. Leading '-' = optional.
-EnvironmentFile=-%h/claude-os/config/notify.env
+EnvironmentFile=-@@ROOT@@/config/notify.env
 Restart=always
 RestartSec=5
 

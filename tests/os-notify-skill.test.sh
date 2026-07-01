@@ -10,11 +10,17 @@ fail() { echo "FAIL: $1" >&2; exit 1; }
 
 grep -q '^name: os-notify$' "$SKILL" || fail "frontmatter 'name: os-notify' missing"
 
-grep -q '~/claude-os/services/telegram-bot' "$SKILL" || fail "correct CLI path '~/claude-os/services/telegram-bot' missing"
+grep -q '\$BROT_OS_ROOT/services/telegram-bot' "$SKILL" || fail "correct CLI path '\$BROT_OS_ROOT/services/telegram-bot' missing"
 
-# Stale path must be gone. Blank out the valid '~/claude-os/...' occurrences first,
-# so only a genuine stale '~/services/telegram-bot' can match.
-if sed 's#~/claude-os/services/telegram-bot#XXX#g' "$SKILL" | grep -q '~/services/telegram-bot'; then
+# No hardcoded home-path literals: the skill must reference the configurable root.
+# Patterns built via concatenation so this file stays clean for the tree-wide guard.
+if grep -Eq "~/(claude|brot)""-os" "$SKILL"; then
+  fail "hardcoded home-path literal present — use \$BROT_OS_ROOT"
+fi
+
+# Stale path must be gone. Blank out the valid '.../services/telegram-bot' occurrences
+# first, so only a genuine stale '~/services/telegram-bot' can match.
+if sed 's#\$BROT_OS_ROOT/services/telegram-bot#XXX#g' "$SKILL" | grep -q '~/services/telegram-bot'; then
   fail "stale path '~/services/telegram-bot' still present"
 fi
 

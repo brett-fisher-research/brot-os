@@ -7,36 +7,36 @@ allowed-tools: Bash Read Write Edit WebFetch
 
 # New experiment
 
-You are creating a new self-hosted experiment in `~/claude-os/experiments/`. Read
-`~/claude-os/CLAUDE.md` and `~/claude-os/experiments/CLAUDE.md` before scaffolding — they
+You are creating a new self-hosted experiment in `$BROT_OS_ROOT/experiments/`. Read
+`$BROT_OS_ROOT/CLAUDE.md` and `$BROT_OS_ROOT/experiments/CLAUDE.md` before scaffolding — they
 define the routing/basePath invariants you MUST follow. An experiment is a **plain web app**
 accessed through the dashboard; it is **not a PWA by default**. (Installable-PWA support is an
-optional add-on — see `~/claude-os/templates/PWA.md` — only when the user asks for it.)
+optional add-on — see `$BROT_OS_ROOT/templates/PWA.md` — only when the user asks for it.)
 
 `experiments/` is its **own separate git repo** (remote
-`https://github.com/brett-fisher-research/experiments.git`), gitignored by claude-os, holding
-*many* self-contained experiments — not a repo per experiment, and NOT part of the claude-os
-repo. Scaffold into a new subdir `~/claude-os/experiments/<slug>/`; do NOT `git init` or
+`https://github.com/brett-fisher-research/experiments.git`), gitignored by brot-os, holding
+*many* self-contained experiments — not a repo per experiment, and NOT part of the brot-os
+repo. Scaffold into a new subdir `$BROT_OS_ROOT/experiments/<slug>/`; do NOT `git init` or
 `gh repo create` inside it. All git work for an experiment (branch, commits, PR) happens in the
-`experiments` repo, never in claude-os.
+`experiments` repo, never in brot-os.
 
 The user's idea is in `$ARGUMENTS`. Build it well, mobile-first, and end by printing the URL.
 
 **Building an experiment is a code change, so it rides on a PR — in the `experiments` repo.**
-Before scaffolding, `cd ~/claude-os/experiments` and invoke the **`/pr`** skill there to guard
+Before scaffolding, `cd $BROT_OS_ROOT/experiments` and invoke the **`/pr`** skill there to guard
 against unsaved work, branch off that repo's up-to-date `main` (e.g. `feat/<slug>`), and set up
 the commit-at-every-step discipline. The branch, commits, and PR all live in the `experiments`
-repo, NOT claude-os. Commit each increment as you go; `/pr` pushes and opens the PR, then
+repo, NOT brot-os. Commit each increment as you go; `/pr` pushes and opens the PR, then
 `/merge` lands it once the user is happy.
 
 ## Steps
 
-0. **Start the PR — in the experiments repo.** `cd ~/claude-os/experiments`, then invoke **`/pr`**
+0. **Start the PR — in the experiments repo.** `cd $BROT_OS_ROOT/experiments`, then invoke **`/pr`**
    with a `feat/<slug>` branch (off the `experiments` repo's `main`). Everything below happens on
-   that branch in the `experiments` repo, committed step by step — never on a claude-os branch.
+   that branch in the `experiments` repo, committed step by step — never on a brot-os branch.
 
 1. **Pick a slug.** Kebab-case, short, unique. Check `jq -r '.experiments|keys[]'
-   ~/claude-os/registry.json` and `ls ~/claude-os/experiments/` to avoid collisions. If the idea
+   $BROT_OS_ROOT/registry.json` and `ls $BROT_OS_ROOT/experiments/` to avoid collisions. If the idea
    is ambiguous in a way that changes the build, ask ONE clarifying question; otherwise proceed.
 
 2. **Choose the tier:**
@@ -49,27 +49,27 @@ repo, NOT claude-os. Commit each increment as you go; `/pr` pushes and opens the
    Keep the stack minimal; don't add dependencies the idea doesn't need.
 
 3. **Make the experiment dir — NO per-experiment GitHub repo.** Experiments live together in the
-   one `experiments` repo (its own repo, separate from claude-os) so they can iterate fast and
-   share code via `packages/`. Just create `~/claude-os/experiments/<slug>/` and build into it
+   one `experiments` repo (its own repo, separate from brot-os) so they can iterate fast and
+   share code via `packages/`. Just create `$BROT_OS_ROOT/experiments/<slug>/` and build into it
    (do NOT `git init` inside it, do NOT `gh repo create` — the surrounding `experiments` repo
    already tracks it). Shared logic (data fetchers, clients) goes in `packages/<name>/` as a
    `"type": "module"` package and is imported by **relative path** (e.g.
    `import { x } from '../../../packages/<name>/index.js'`) — never copied. An experiment
    graduates to its own `apps/` repo later by hand.
 
-4. **Scaffold.** (Run these from `~/claude-os/experiments/`.)
+4. **Scaffold.** (Run these from `$BROT_OS_ROOT/experiments/`.)
    - **next:** `npx create-next-app@latest <slug> --ts --app --eslint --no-tailwind
      --no-src-dir --use-npm --yes` (add Tailwind only if helpful). Then:
      - Set `basePath: '/<slug>'` and `output: 'standalone'` in `next.config` (see
-       `~/claude-os/templates/next.config.snippet.js`).
+       `$BROT_OS_ROOT/templates/next.config.snippet.js`).
      - Build the actual feature. Put any in-app routes under the App Router as normal —
        `next/link` auto-applies basePath. Make it mobile-first.
      - **Do NOT add a PWA by default** (no manifest, no service worker, no icon generation).
        It's a plain web app opened through the dashboard. *Only if the user asks for it to be
-       installable*, follow the opt-in recipe in `~/claude-os/templates/PWA.md`.
+       installable*, follow the opt-in recipe in `$BROT_OS_ROOT/templates/PWA.md`.
    - **static:** write `index.html` + assets in `experiments/<slug>/` using **relative** paths.
      No manifest / service worker / icons by default — add them only if the user wants the page
-     installable (opt-in: `~/claude-os/templates/PWA.md`).
+     installable (opt-in: `$BROT_OS_ROOT/templates/PWA.md`).
    - **worker:** write `experiments/<slug>/index.js` (plain Node ESM, zero deps where possible)
      and a minimal `package.json` with `"type": "module"`. Long-lived loop, no HTTP server. Read
      any secrets from env (injected via `EnvironmentFile`). Put reusable fetch/client logic in
@@ -78,9 +78,9 @@ repo, NOT claude-os. Commit each increment as you go; `/pr` pushes and opens the
 4b. **Notifications.** Two ways to ping the phone (both use the shared Telegram secret, auto-
    injected into every `exp-<slug>` service via `EnvironmentFile`):
    - **One-way (any experiment):** in a **next** app, vendor the helper —
-     `cp ~/claude-os/templates/notify.ts experiments/<slug>/lib/notify.ts` — and
+     `cp $BROT_OS_ROOT/templates/notify.ts experiments/<slug>/lib/notify.ts` — and
      `await notify("…")` from a server route/action. (Vendoring keeps a Next standalone build
-     self-contained.) In shell/cron, call `~/claude-os/bin/notify.sh "…"`.
+     self-contained.) In shell/cron, call `$BROT_OS_ROOT/bin/notify.sh "…"`.
    - **Two-way (commands):** the two-way Telegram bot lives in `services/` — add a `/command`
      there rather than building a new bot. Don't run a second Telegram long-poller — only one
      consumer of `getUpdates` may exist.
@@ -89,16 +89,16 @@ repo, NOT claude-os. Commit each increment as you go; `/pr` pushes and opens the
    ```bash
    # static ONLY: register-experiment.sh resolves the served dir from apps/<slug>, so link it
    # to the experiment dir first (same pattern as the existing coin-bandit static experiment):
-   ln -s ~/claude-os/experiments/<slug> ~/claude-os/apps/<slug>   # static only; gitignored, host-local
+   ln -s $BROT_OS_ROOT/experiments/<slug> $BROT_OS_ROOT/apps/<slug>   # static only; gitignored, host-local
 
-   ~/claude-os/bin/register-experiment.sh <slug> next     # or: static | worker
+   $BROT_OS_ROOT/bin/register-experiment.sh <slug> next     # or: static | worker
    # next: then build + start:
-   ~/claude-os/bin/rebuild-experiment.sh <slug>
+   $BROT_OS_ROOT/bin/rebuild-experiment.sh <slug>
    # worker: register already started it; rebuild only after code changes.
    ```
-   Registering writes the **canonical** `~/claude-os/registry.json`. The dashboard's
+   Registering writes the **canonical** `$BROT_OS_ROOT/registry.json`. The dashboard's
    experiments **listing** is served by the `experiments-registry` service (`:4001`), which the
-   installed unit points at that same canonical file (`REGISTRY_PATH=%h/claude-os/registry.json`).
+   installed unit points at that same canonical file (`REGISTRY_PATH=$BROT_OS_ROOT/registry.json`).
    So a successful `register-experiment.sh` is all it takes for the experiment to appear in the
    dashboard — there is **no separate "add to the service" step**. (If the listing is ever stale,
    the service is reading the wrong file: check `systemctl --user show exp-experiments-registry -p
@@ -115,7 +115,7 @@ repo, NOT claude-os. Commit each increment as you go; `/pr` pushes and opens the
    ```
 
 7. **Make sure everything is committed** on the PR branch from step 0 — in the `experiments` repo
-   (it holds the experiment; no per-experiment repo, and nothing lands in claude-os). Per `/pr`,
+   (it holds the experiment; no per-experiment repo, and nothing lands in brot-os). Per `/pr`,
    never leave uncommitted work when you hand back. `/pr` pushes and opens the PR; the user
    reviews it, then runs **`/merge`** to land it.
 

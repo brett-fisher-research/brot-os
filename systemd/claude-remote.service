@@ -5,14 +5,14 @@
 # session times out, systemd brings it straight back. Because --name is fixed, the
 # session always reappears under the same title in the phone's session list.
 [Unit]
-Description=Claude Code Remote Control (claude-os)
+Description=Claude Code Remote Control (brot-os)
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=%h/claude-os
-ExecStart=@@CLAUDE@@ remote-control --name "claude-os"
+WorkingDirectory=@@ROOT@@
+ExecStart=@@CLAUDE@@ remote-control --name "brot-os"
 Restart=always
 RestartSec=15
 # nvm-installed node must be on PATH for the session's tools.
