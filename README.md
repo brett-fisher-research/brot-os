@@ -47,3 +47,14 @@ root explicitly (e.g. for a service or a non-standard checkout), set `BROT_OS_RO
 ```sh
 BROT_OS_ROOT=/opt/brot-os bin/bootstrap.sh
 ```
+
+## Tests
+
+Bash assertion suites live in `tests/`. Canonical command:
+
+```sh
+bash tests/run.sh
+```
+
+It execs every `tests/*.test.sh` and exits non-zero if any is red. `npm test` from the repo
+root runs the same thing.
