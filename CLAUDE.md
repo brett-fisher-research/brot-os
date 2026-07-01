@@ -90,6 +90,3 @@ apps/<name>/      promoted, productionized projects — each its own repo
 
 All code changes in tracked claude-os and in each tenant repo go through `/pr` → `/merge`
 (`/pr` branches, commits, pushes, opens the PR; `/merge` lands it).
-
-Exception — bulk repo creation via `/swarm`: brand-new repos are committed + pushed directly,
-no base to PR against.
