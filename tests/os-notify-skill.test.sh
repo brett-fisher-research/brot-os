@@ -18,4 +18,13 @@ if sed 's#~/claude-os/services/telegram-bot#XXX#g' "$SKILL" | grep -q '~/service
   fail "stale path '~/services/telegram-bot' still present"
 fi
 
+# Prose rules: refer to the user as "the user", never by name; no ** markdown emphasis.
+if grep -q 'Brett' "$SKILL"; then
+  fail "contains 'Brett' — refer to 'the user' instead"
+fi
+
+if grep -q '\*\*' "$SKILL"; then
+  fail "contains '**' markdown emphasis — strip it"
+fi
+
 echo "PASS: os-notify skill"
