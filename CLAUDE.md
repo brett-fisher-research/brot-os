@@ -85,6 +85,8 @@ services/<name>/  long-running daemons that own data behind an API — each its 
 experiments/      its OWN separate repo (a tenant, NOT brot-os) holding many self-contained
                   Next.js experiments — git work lands in that repo, never brot-os (scratch/iterate)
 apps/<name>/      promoted, productionized projects — each its own repo
+dotfiles/<tool>-conf/  tool-config repos (nvim-conf, wezterm-conf, tmux-conf) — each its own repo,
+                  each with an idempotent `npm run setup`
 ```
 
 ## Code changes ride a PR
