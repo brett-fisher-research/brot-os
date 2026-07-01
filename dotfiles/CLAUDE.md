@@ -1,0 +1,17 @@
+# dotfiles/
+
+Container for the user's tool-config repos. Tenants, not brot-os code.
+
+## Convention
+
+- One config repo per tool: `nvim-conf`, `wezterm-conf`, `tmux-conf`.
+- Each is its own git repo under `github.com/brett-fisher-research`, cloned into this dir.
+- Each exposes an idempotent `npm run setup` that copies its config into the tool's platform
+  location (e.g. `%LOCALAPPDATA%\nvim`, `~/.wezterm.lua`). Re-run after every pull.
+- The repo is the single source of truth — edit config in the repo, re-run setup; never edit
+  the installed copy.
+
+## Tracking
+
+- Everything here is gitignored by brot-os (`*` + `!.gitignore` + `!CLAUDE.md`). No submodules.
+- Git work (branches, PRs) happens inside each tenant repo, never in brot-os.

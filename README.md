@@ -21,8 +21,10 @@ Think Unix. Each top-level dir maps to a role:
 - `packages/` — shared, generic modules (e.g. `@brot-os/notify`). Reusable across projects.
 - `services/` — long-running daemons that own data behind an API — each its own repo.
 - `apps/` — promoted, productionized projects — each its own repo.
+- `dotfiles/` — tool-config repos (nvim-conf, wezterm-conf, tmux-conf) — each its own repo with an
+  idempotent `npm run setup`.
 
-Tenants (`experiments/`, `services/`, `apps/`, most of `packages/`) are their own git repos inside
+Tenants (`experiments/`, `services/`, `apps/`, `dotfiles/`, most of `packages/`) are their own git repos inside
 container dirs and are gitignored by brot-os. brot-os is the OS; the projects are userland.
 
 ## Quickstart
