@@ -25,7 +25,8 @@ ask looks. Open the board first. The brot loop is the default for all work in br
   box is checked, deletes `BROT_PLAN.md`.
 
 Support — `/brot-dev` runs the hot-reloaded dev server once in a background agent (logs to a
-gitignored `.logs/`). Brot skills live in `~/.claude/skills/` (`brot-*`); NOT vendored here.
+gitignored `.logs/`). Brot skills live in-repo under `.claude/skills/` (`brot-*`), git-tracked
+and native to brot-os.
 
 ## Prose style: razor
 
@@ -76,7 +77,7 @@ tool genuinely needs them — document the exception in that project's own `CLAU
 ## Layout
 
 ```
-.claude/skills/   the commands (copied from claude-experiments, wording kept for now)
+.claude/skills/   the commands — git-tracked in-repo, native to brot-os
 bin/ systemd/ templates/   the kernel: routing, services, publishing, notify, console-check
 config/           secrets + env (GITIGNORED) + *.example templates
 packages/<name>/  shared modules (notify is tracked & generic; others are tenant repos)
