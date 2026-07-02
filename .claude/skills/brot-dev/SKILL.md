@@ -22,7 +22,7 @@ The PM (main thread) is the single source of truth for "is the server up". Start
 ## Logs (the convention every brot skill knows)
 - Dev-server output → a gitignored `.logs/` dir at the project root (e.g. `.logs/dev.log`). Add `.logs/` to `.gitignore` if absent.
 - Browser console logs must land somewhere greppable too — `.logs/browser.log`. Driving the page with Playwright is an acceptable way to capture console output to that file.
-- Any brot skill (notably `/brot-bot`) reads `.logs/` to see what the running app is doing instead of starting its own server.
+- Any brot skill — and any dispatched coding subagent — reads `.logs/` to see what the running app is doing instead of starting its own server.
 
 ## Hand off
-Runs alongside `/brot-bot` (the coding agent reads `.logs/` while it builds). Torn down in `/brot-done` when brot mode ends.
+Runs alongside the board's dispatched coding subagents (they read `.logs/` while they build). Torn down at the ship gate ("done" / "ship it" on the board) with the rest of the background agents.
