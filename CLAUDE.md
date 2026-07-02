@@ -111,7 +111,7 @@ bodies, PR descriptions.
 | man pages / FHS | this root `CLAUDE.md` — the single blueprint (see Layout) |
 | shared libs | `packages/` |
 | daemons | `services/` |
-| installed programs | `apps/` |
+| installed programs | `projects/` |
 | `/tmp`, scratch | `experiments/` |
 | `/home`, `/srv` | your tenant repos (your content) |
 
@@ -133,7 +133,7 @@ brot-os is the OS; your projects are userland.
 
 ## Language default
 
-TypeScript for anything written here (packages, services, apps). Other languages allowed when a
+TypeScript for anything written here (packages, services, projects). Other languages allowed when a
 tool genuinely needs them — document the exception in that project's own `CLAUDE.md`.
 
 ## Layout
@@ -146,7 +146,7 @@ packages/<name>/  shared modules (notify is tracked & generic; others are tenant
 services/<name>/  long-running daemons that own data behind an API — each its own repo
 experiments/      its OWN separate repo (a tenant, NOT brot-os) holding many self-contained
                   Next.js experiments — git work lands in that repo, never brot-os (scratch/iterate)
-apps/<name>/      promoted, productionized projects — each its own repo
+projects/<name>/  promoted, productionized projects — each its own repo
 dotfiles/<tool>-conf/  tool-config repos (nvim-conf, wezterm-conf, tmux-conf) — each its own repo,
                   each with an idempotent `npm run setup`
 sync.manifest.json  tracked registry: tenant dir → remote, read by `npm run sync` (bin/sync.mjs)

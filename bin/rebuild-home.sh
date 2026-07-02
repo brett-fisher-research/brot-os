@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Rebuild the home dashboard (apps/dashboard) Next app and restart its installed systemd
+# Rebuild the home dashboard (projects/dashboard) Next app and restart its installed systemd
 # service, then re-render Caddy LAST so the root fallback only flips to reverse_proxy after
 # the service is back up (no '/' 502 window).
 #
 # The dashboard runs as the canonical `dashboard.service` unit (symlinked from
-# apps/dashboard/deploy/dashboard.service), bound to HOME_PORT. This script restarts THAT
+# projects/dashboard/deploy/dashboard.service), bound to HOME_PORT. This script restarts THAT
 # unit — it must NOT generate a second, competing unit on the same port.
 #
 # Usage: rebuild-home.sh
