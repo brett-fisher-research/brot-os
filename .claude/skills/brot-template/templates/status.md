@@ -7,7 +7,9 @@ description: >
 ---
 
 ```
-🥨 STATUS
+╔═══════════════════════════════════════╗
+║  🥨 📡  STATUS                          ║
+╚═══════════════════════════════════════╝
 
 ## Running agents
 - <name> · <repo> · <goal in a few words> · <state>

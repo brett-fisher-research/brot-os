@@ -9,7 +9,10 @@ description: >
 ---
 
 ```
-🧑 Human steps — <verify | setup>: <subject>
+╔═══════════════════════════════════════╗
+║  🥨 🧑  HUMAN STEPS                     ║
+╚═══════════════════════════════════════╝
+<verify | setup>: <subject>
 
 1. <imperative action> — <where / how>
    → expect: <observable result>

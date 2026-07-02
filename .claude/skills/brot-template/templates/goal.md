@@ -7,12 +7,14 @@ description: >
 ---
 
 ```
-===============
-🎯 GOAL: <stated goal here>
+╔═══════════════════════════════════════╗
+║  🥨 🎯  GOAL                            ║
+╚═══════════════════════════════════════╝
+<stated goal here>
+
 📋 VERIFICATION:
 <ordered list of deterministic items that confirm the goal is complete, ideally 2-3 items and no more than 5>
 1. 
 2. 
 3.
-===============
 ```

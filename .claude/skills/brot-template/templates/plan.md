@@ -7,7 +7,10 @@ description: >
 ---
 
 ```
-# PLAN — <title>
+╔═══════════════════════════════════════╗
+║  🥨 🗺️  PLAN                            ║
+╚═══════════════════════════════════════╝
+<title>
 
 Goal: <1-2 sentences: the end-state and why>
 

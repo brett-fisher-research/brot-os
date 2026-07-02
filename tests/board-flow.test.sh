@@ -62,6 +62,12 @@ for t in goal plan humansteps status shipped; do
 done
 check "exactly 5 templates on disk" '[ "$(ls "$TDIR" | wc -l)" -eq 5 ]'
 
+# --- every template opens with an ASCII box header ---------------------------
+for t in goal plan humansteps status shipped; do
+  check "template $t.md has a box header" \
+    "grep -q '╔' $TDIR/$t.md && grep -q '║' $TDIR/$t.md && grep -q '╚' $TDIR/$t.md"
+done
+
 # --- plan template ------------------------------------------------------------
 PLAN=$TDIR/plan.md
 check "plan template forbids coordinate labels" "grep -qi 'forbid' $PLAN"
