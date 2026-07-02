@@ -1,32 +1,72 @@
 # brot-os
 
-A virtual AI OS: a home-directory workspace driven almost entirely through Claude Code skills.
-Skills are the commands, the kernel is the hosting machinery, projects live as self-contained
-repos in well-known directories.
+A virtual AI OS: one macro repo hosting many gitignored tenant repos, driven almost entirely
+through Claude Code skills. Skills are the commands, the kernel (`bin/` + `systemd/`) is the
+hosting machinery, projects live as self-contained repos in well-known directories. brot-os is
+the OS; your projects are userland.
 
 > Status — custom-first. Built for the user's setup now; skill/kernel wording may be
 > user-specific. Genericizing into a clean open-source blueprint is deliberate later work.
 
-## Default workflow: brot 🥨
+## Opinions
 
-ALWAYS start in brot board mode. No exceptions. Every session, every task begins with
-`/brot-board` before any research, planning, or code — no matter how small or well-defined the
-ask looks. Open the board first. The brot loop is the default for all work in brot-os:
+The framework is opinionated. Each opinion, and why it holds:
 
-- Whiteboard — `/brot-board`. Mandatory entry point. Permissive thinking space: explore the
-  codebase, search the web, weigh options, poke holes. Never nudges toward a diff. Leave only
-  when the user moves to `/brot-plan`.
-- Plan — `/brot-plan`. Converged thinking → recursive, deterministic plan: goal broken to atomic
-  leaves, each with a specific verifiable test. Writes a gitignored `BROT_PLAN.md`. Enters brot mode.
-- Implement — `/brot-bot`. ONE background coding agent builds off-thread (code + test per leaf,
-  ticks its own boxes, raises `/pr`). Main thread stays PM: plans, relays status, chats, merges —
-  never writes the code itself.
-- Done — `/brot-done`. PM merges after you approve, tears down background agents, verifies every
-  box is checked, deletes `BROT_PLAN.md`.
+1. Skills are the interface; deterministic mechanics live in scripts skills call (`npm run
+   test/dev/setup/sync`) — judgment stays with the model, mechanics never get guessed at.
+2. The main thread is a PM that never writes code — subagents do all the work, so the
+   conversation stays free for steering.
+3. Every subagent gets a goal contract: one goal, deterministic verification criteria — agents
+   own outcomes, not step lists.
+4. Tests live in `tests/`; bash assertion suites are first-class alongside vite — every claim of
+   done is checkable.
+5. Every repo carries a `package.json` with standard verbs: `test`, `dev`, `setup` — the same
+   muscle memory works in every tenant.
+6. All code changes ride a PR (`/pr` → human review → `/merge`); nothing lands directly — the
+   human gate is the quality bar.
+7. Mechanism vs config: tracked code is generic; anything host/account/secret-specific lives in
+   gitignored `config/` — the repo stays shareable.
+8. Razor prose everywhere: dense, skimmable, no bold/italic markdown emphasis, the user is "the
+   user" — attention is the scarce resource.
+9. brot-os is a macro repo: one OS repo hosting many gitignored tenant repos, synced via
+   manifest — one clone bootstraps a whole machine.
+
+## The workflow: board → plan → go → review → ship 🥨
+
+ALWAYS start in board mode. No exceptions. Every session, every task begins with `/brot-board`
+before any research, planning, or code — no matter how small the ask looks. The board is the one
+manual entry point; everything after it moves on plain language.
+
+- Board — `/brot-board`, mandatory. A persistent, permissive thinking space: explore the
+  codebase, search the web, weigh options, poke holes. Never nudges toward action.
+- Plan — proposed by the board when the user asks ("let's see a plan") or thinking has clearly
+  converged. Printed in chat via the plan template (human-scannable, checkbox-free) AND written
+  to `.brot/plans/<unixtimestamp>-<short-name>.md` — gitignored, NEVER deleted. The file carries
+  `- [ ]` boxes per leaf + test; it is the archive and the machine tracker agents tick.
+- Go gate — the user approves in plain words: "go", "build it". The PM then dispatches
+  background subagents. One subagent max per repo; multi-repo work fans out, one agent per repo.
+  Worktrees are future work.
+- Dispatch — every dispatch is a goal contract: one goal + 2-5 deterministic verification
+  criteria + repo conventions. Subagents are NEVER given plan-section coordinates — they own an
+  outcome, not a location in a document.
+- Review — each agent codes, writes tests to `tests/`, ticks its boxes in the plan file, raises
+  `/pr`. The PM prints the status template plus a humansteps verify block — EVERY PR handoff
+  ends with humansteps.
+- Ship gate — when the user says one of: done, finish, cleanup, ship it — the PM merges all
+  approved PRs via `/merge`, deletes branches, stops all subagents, verifies plan boxes are
+  ticked (warn + confirm if not), and prints the shipped template. Plan files stay in
+  `.brot/plans/`.
 
 Support — `/brot-dev` runs the hot-reloaded dev server once in a background agent (logs to a
 gitignored `.logs/`). Brot skills live in-repo under `.claude/skills/` (`brot-*`), git-tracked
 and native to brot-os.
+
+## The PM rule (standing constitution)
+
+The main thread is the PM. It NEVER writes code — in any mode, at any point in the session,
+including follow-ups after a PR. Coding, research, and writing work is ALWAYS delegated to
+subagents. Code changes ride subagent → `/pr` → human review → PM `/merge`. This holds even
+when a fix looks one-line trivial: skills load transiently, this rule does not.
 
 ## Skills drive scripts (the operating philosophy)
 
@@ -110,6 +150,8 @@ apps/<name>/      promoted, productionized projects — each its own repo
 dotfiles/<tool>-conf/  tool-config repos (nvim-conf, wezterm-conf, tmux-conf) — each its own repo,
                   each with an idempotent `npm run setup`
 sync.manifest.json  tracked registry: tenant dir → remote, read by `npm run sync` (bin/sync.mjs)
+.brot/plans/      plan archive (GITIGNORED, never deleted): <unixtimestamp>-<short-name>.md
+                  trackers with checkboxes agents tick
 ```
 
 ## Code changes ride a PR
