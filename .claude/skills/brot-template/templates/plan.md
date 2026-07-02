@@ -1,35 +1,33 @@
 ---
 description: >
-    This template is the output of /brot-plan: a recursive, deterministic build plan written to a gitignored BROT_PLAN.md.
+    The board's plan proposal, in two views with the same content. Chat view: exactly this template — human-scannable, checkbox-free. File view: the same plan written to .brot/plans/<unixtimestamp>-<short-name>.md (gitignored, never deleted), where each leaf and each test line gains a `- [ ]` box for machine tracking — agents tick them as work lands.
 
-    Two parts. First, the high-level goal in 2-3 sentences — what end-state we're building and why. Second, a recursive checkbox breakdown: big pieces split into sub-steps, recursed until every leaf is an atomic unit of work. Surface only 1-3 tasks at a time per level so it stays skimmable. Use emojis as visual anchors (🎯 goal, 📋 test, 🪨 big piece). EVERY leaf carries a SPECIFIC, verifiable test — a bash assertion or a vite test — never a vague "done when it works".
+    Shape: a title line, a short goal (1-2 sentences), phases as headings, and under each phase numbered one-line leaves with a one-line test each. Leaf names are DESCRIPTIVE ONLY — section-coordinate labels (A1/B2 style) are forbidden anywhere in the plan. Close with a verification section: the deterministic checks that prove the whole plan done.
 
 ---
 
 ```
-# BROT_PLAN — <title>
+╔═══════════════════════════════════════╗
+║  🥨 🗺️  PLAN                            ║
+╚═══════════════════════════════════════╝
+<title>
 
-> Gitignored scratch tracker. Durable record = merged PRs. /brot-done deletes this.
+Goal: <1-2 sentences: the end-state and why>
 
-## 🎯 High-level goal
-<2-3 sentences: the end-state being built and why>
+## <Phase name>
 
-## Order: <dependency order, e.g. A → B → C>
+1. <one-line leaf, descriptive name>
+   Test: <specific bash assertion or vite test>
+2. <one-line leaf>
+   Test: <specific test>
 
----
+## <Next phase name>
 
-## 🪨 <Big piece 1>
+1. <one-line leaf>
+   Test: <specific test>
 
-- [ ] <leaf task>
-  - 🎯 <atomic goal for this leaf>
-  - [ ] 📋 Test: <specific bash assertion or vite test that proves this leaf done>
-- [ ] <leaf task>
-  - 🎯 <atomic goal>
-  - [ ] 📋 Test: <specific test>
+## Verification
 
-## 🪨 <Big piece 2> (depends on 1)
-
-- [ ] <leaf task>
-  - 🎯 <atomic goal>
-  - [ ] 📋 Test: <specific test>
+- <deterministic check that proves the whole plan done>
+- <another check>
 ```

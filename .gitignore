@@ -14,5 +14,5 @@ HIVE.md
 # instance registry data (experiments-registry service will own this)
 /registry.json
 
-# brot plan scratch tracker
-BROT_PLAN.md
+# plan archive + machine trackers (never deleted, never tracked)
+.brot/
