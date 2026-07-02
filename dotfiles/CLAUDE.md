@@ -7,8 +7,10 @@ Container for the user's tool-config repos. Tenants, not brot-os code.
 - One config repo per tool: `nvim-conf`, `wezterm-conf`, `tmux-conf`.
 - Each is its own git repo under `github.com/brett-fisher-research`, cloned into this dir.
 - Each exposes an idempotent `npm run setup` that copies its config into the tool's platform
-  location (e.g. `%LOCALAPPDATA%\nvim`, `~/.wezterm.lua`). Re-run after every pull.
-- The repo is the single source of truth — edit config in the repo, re-run setup; never edit
+  location (e.g. `%LOCALAPPDATA%\nvim`, `~/.wezterm.lua`).
+- Don't cd in here to pull or setup — run `npm run sync` (or `/brot-sync`) from the brot-os
+  root: it pulls every repo listed in `sync.manifest.json` and drives each `npm run setup`.
+- The repo is the single source of truth — edit config in the repo, re-sync; never edit
   the installed copy.
 
 ## Tracking

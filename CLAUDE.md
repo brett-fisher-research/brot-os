@@ -28,6 +28,28 @@ Support — `/brot-dev` runs the hot-reloaded dev server once in a background ag
 gitignored `.logs/`). Brot skills live in-repo under `.claude/skills/` (`brot-*`), git-tracked
 and native to brot-os.
 
+## Skills drive scripts (the operating philosophy)
+
+The user drives everything through skills, from the brot-os root — 99% of the time. Skills do
+the judgment; deterministic work belongs in scripts the skills call, so Claude never guesses at
+mechanics:
+
+- Deterministic → npm scripts. Always simple, memorable root verbs: `npm run test`,
+  `npm run sync`, `npm run setup`, `npm run dev`. Scripts are idempotent and safe to re-run.
+- Judgment → skills. A skill runs the script, reads its output, verifies it worked, and handles
+  the gaps (e.g. `/brot-sync` wraps `npm run sync`).
+- Never `cd` into a tenant to run things by hand — root verbs and skills reach in for you.
+- If a skill is hand-rolling steps a script could own, that's a bug: move the mechanics into a
+  script and have the skill drive it.
+
+## Tenant sync
+
+`sync.manifest.json` (tracked, at root) maps tenant dirs to their remotes. `npm run sync` reads
+it and per entry: clones if missing, ff-only pulls if clean, skips dirty repos, then runs the
+tenant's idempotent `npm run setup` when defined — and reports (including repos on disk the
+manifest doesn't list). `/brot-sync` wraps it with verification and gap-handling. Cross-machine
+flow: pull brot-os, run `/brot-sync` (or `npm run sync`), done.
+
 ## Prose style: razor
 
 All prose is razor style. No exceptions. Applies to chat replies, docs, READMEs, plans, commit
@@ -87,6 +109,7 @@ experiments/      its OWN separate repo (a tenant, NOT brot-os) holding many sel
 apps/<name>/      promoted, productionized projects — each its own repo
 dotfiles/<tool>-conf/  tool-config repos (nvim-conf, wezterm-conf, tmux-conf) — each its own repo,
                   each with an idempotent `npm run setup`
+sync.manifest.json  tracked registry: tenant dir → remote, read by `npm run sync` (bin/sync.mjs)
 ```
 
 ## Code changes ride a PR
