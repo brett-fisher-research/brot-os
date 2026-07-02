@@ -16,7 +16,7 @@ check "title line is # brot-os" '[ "$(head -1 README.md)" = "# brot-os" ]'
 check "no old name in README" '! grep -Iiq "$OLD" README.md'
 
 check "has ## Layout section" 'grep -q "^## Layout" README.md'
-for d in bin config apps packages services systemd templates; do
+for d in bin config projects packages services systemd templates; do
   check "Layout names $d" "grep -Eq '\`$d/?\`' README.md"
 done
 

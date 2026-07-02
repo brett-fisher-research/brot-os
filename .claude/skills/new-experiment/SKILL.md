@@ -55,7 +55,7 @@ repo, NOT brot-os. Commit each increment as you go; `/pr` pushes and opens the P
    already tracks it). Shared logic (data fetchers, clients) goes in `packages/<name>/` as a
    `"type": "module"` package and is imported by **relative path** (e.g.
    `import { x } from '../../../packages/<name>/index.js'`) — never copied. An experiment
-   graduates to its own `apps/` repo later by hand.
+   graduates to its own `projects/` repo later by hand.
 
 4. **Scaffold.** (Run these from `$BROT_OS_ROOT/experiments/`.)
    - **next:** `npx create-next-app@latest <slug> --ts --app --eslint --no-tailwind
@@ -87,9 +87,9 @@ repo, NOT brot-os. Commit each increment as you go; `/pr` pushes and opens the P
 
 5. **Register + run:**
    ```bash
-   # static ONLY: register-experiment.sh resolves the served dir from apps/<slug>, so link it
+   # static ONLY: register-experiment.sh resolves the served dir from projects/<slug>, so link it
    # to the experiment dir first (same pattern as the existing coin-bandit static experiment):
-   ln -s $BROT_OS_ROOT/experiments/<slug> $BROT_OS_ROOT/apps/<slug>   # static only; gitignored, host-local
+   ln -s $BROT_OS_ROOT/experiments/<slug> $BROT_OS_ROOT/projects/<slug>   # static only; gitignored, host-local
 
    $BROT_OS_ROOT/bin/register-experiment.sh <slug> next     # or: static | worker
    # next: then build + start:
