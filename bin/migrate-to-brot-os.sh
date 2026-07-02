@@ -80,7 +80,9 @@ PROFILES_OLD=""
 origin_url="$(git -C "$ROOT" remote get-url origin 2>/dev/null || echo '')"
 printf '%s' "$origin_url" | grep -qiF "$OLD_NAME" && ORIGIN_OLD=1
 if [ -d "$SYSTEMD_DEST" ]; then
-  UNITS_OLD="$(grep -rliF "$OLD_NAME" "$SYSTEMD_DEST" 2>/dev/null | wc -l | tr -d ' ')"
+  # `|| true`: with pipefail, grep's exit 1 on a clean host would kill the script
+  # before it could ever reach its own "already migrated" path.
+  UNITS_OLD="$(grep -rliF "$OLD_NAME" "$SYSTEMD_DEST" 2>/dev/null | wc -l | tr -d ' ')" || true
 fi
 for f in "$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.profile"; do
   [ -f "$f" ] && grep -qF "$OLD_ENV" "$f" 2>/dev/null && PROFILES_OLD="$PROFILES_OLD $f"
