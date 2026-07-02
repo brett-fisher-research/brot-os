@@ -2,6 +2,7 @@
   "name": "brot-os",
   "private": true,
   "scripts": {
-    "test": "bash tests/run.sh"
+    "test": "bash tests/run.sh",
+    "sync": "node bin/sync.mjs"
   }
 }
