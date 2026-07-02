@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Asserts the six brot-* skills are in-repo, git-tracked, with intact frontmatter
+# Asserts the brot-* skills are in-repo, git-tracked, with intact frontmatter
 # and no old-name references.
 set -u
 
@@ -13,7 +13,7 @@ check(){ if eval "$2"; then ok "$1"; else bad "$1"; fi; }
 
 OLD='claude''-os'
 
-for s in board plan bot done dev template; do
+for s in board dev sync template; do
   skill=".claude/skills/brot-$s/SKILL.md"
   check "brot-$s SKILL.md exists" "[ -f '$skill' ]"
   check "brot-$s frontmatter name intact" "grep -q '^name: brot-$s\$' '$skill'"
