@@ -6,10 +6,10 @@ set -euo pipefail
 # Self-locate the repo root so brot-os installs at any path. Override with BROT_OS_ROOT.
 ROOT="${BROT_OS_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 CONFIG_DIR="$ROOT/config"   # the /etc of brot-os: secrets + env (gitignored)
-APPS_DIR="$ROOT/apps"
+APPS_DIR="$ROOT/projects"
 REGISTRY="$ROOT/registry.json"
 CADDYFILE="$ROOT/Caddyfile"
-HOME_DIR="$ROOT/apps/dashboard"
+HOME_DIR="$ROOT/projects/dashboard"
 TEMPLATES_DIR="$ROOT/templates"
 SYSTEMD_SRC="$ROOT/systemd"
 SYSTEMD_DEST="$HOME/.config/systemd/user"
