@@ -10,6 +10,8 @@ description: >
 
     Rendering: the code fence below delimits the banner art ONLY. The table (and any prose) prints OUTSIDE any fence — the CLI renders markdown tables as boxed tables only when unfenced; a fenced table shows raw pipes. Shorten raw URLs in table cells to link form like [#21](url) so columns stay narrow.
 
+    Cells stay terse — a table wider than the terminal degrades into key-value blocks. Work: a few words, no parenthetical detail dumps. PR: always short link form like [#21](url). Dir: the bare tenant path or ./.
+
 ---
 
 ```
