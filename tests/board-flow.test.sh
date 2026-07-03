@@ -56,14 +56,14 @@ done
 # --- brot-template: list matches disk ---------------------------------------
 TDIR=.claude/skills/brot-template/templates
 TSKILL=.claude/skills/brot-template/SKILL.md
-for t in goal plan humansteps status shipped; do
+for t in goal plan humansteps status shipped initiative; do
   check "template $t.md on disk" "[ -f $TDIR/$t.md ]"
   check "brot-template lists $t" "grep -q '^- \`$t\`' $TSKILL"
 done
-check "exactly 5 templates on disk" '[ "$(ls "$TDIR" | wc -l)" -eq 5 ]'
+check "exactly 6 templates on disk" '[ "$(ls "$TDIR" | wc -l)" -eq 6 ]'
 
 # --- every template opens with an ASCII box header ---------------------------
-for t in goal plan humansteps status shipped; do
+for t in goal plan humansteps status shipped initiative; do
   check "template $t.md has a box header" \
     "grep -q '╔' $TDIR/$t.md && grep -q '║' $TDIR/$t.md && grep -q '╚' $TDIR/$t.md"
 done
