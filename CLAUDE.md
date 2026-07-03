@@ -83,6 +83,14 @@ including follow-ups after a PR. Coding, research, and writing work is ALWAYS de
 subagents. Code changes ride subagent → `/pr` → human review → PM `/merge`. This holds even
 when a fix looks one-line trivial: skills load transiently, this rule does not.
 
+## Tenant CLAUDE.md first
+
+When the user says to work on a project ("let's work on duree"), locate the tenant
+(`projects/<name>/`, `services/<name>/`, `dotfiles/`, `experiments/`) and read its own
+`CLAUDE.md` BEFORE any exploration or dispatch — it carries that repo's Claude Code
+instructions (conventions, test verbs, branch rules) and saves exploration tokens. Point
+dispatched subagents at it too.
+
 ## Skills drive scripts (the operating philosophy)
 
 The user drives everything through skills, from the brot-os root — 99% of the time. Skills do
