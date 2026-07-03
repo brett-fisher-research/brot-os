@@ -22,7 +22,7 @@ check "CLAUDE.md states the PM-never-codes rule" 'grep -q "NEVER writes code" CL
 check "CLAUDE.md names the ship vocabulary" 'grep -q "done, finish, cleanup, ship it" CLAUDE.md'
 check "CLAUDE.md names the go vocabulary" 'grep -Fq "\"go\", \"build it\"" CLAUDE.md'
 check "CLAUDE.md documents goal contracts" 'grep -qi "goal contract" CLAUDE.md'
-check "CLAUDE.md caps one subagent per repo" 'grep -qi "one subagent max per repo" CLAUDE.md'
+check "CLAUDE.md dedicates one agent per PR" 'grep -qi "one agent per PR" CLAUDE.md'
 check "CLAUDE.md documents the plan archive dir" 'grep -q "\.brot/plans/" CLAUDE.md'
 check "CLAUDE.md documents board entry as mandatory" 'grep -q "/brot-board" CLAUDE.md'
 
@@ -79,8 +79,8 @@ check "plan template has a verification section" "grep -qi 'verification' $PLAN"
 # --- status template ----------------------------------------------------------
 STATUS=$TDIR/status.md
 check "status template exists" "[ -f $STATUS ]"
-check "status template has running-agents section" "grep -qi 'running agents' $STATUS"
-check "status template has open-PRs section" "grep -qi 'open PRs' $STATUS"
+check "status template prints on every state change" "grep -qi 'every state change' $STATUS"
+check "status template is one work/agent/PR table" "grep -q '| Work | Agent | PR | PR status |' $STATUS"
 
 # --- shipped template -----------------------------------------------------------
 SHIPPED=$TDIR/shipped.md
