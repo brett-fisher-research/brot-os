@@ -44,8 +44,9 @@ plan on the board until the user is happy; rewrite the file as it changes.
 ## Go gate → dispatch
 The user approves in plain words: "go", "build it". Then dispatch background subagents:
 
-- One subagent max per repo. Multi-repo work fans out — one agent per repo. Worktrees are
-  future work.
+- Every PR has its own dedicated agent — one agent per PR, an agent never owns two PRs.
+  Parallel agents in the SAME repo still need care (no worktrees yet): concurrent dispatches go
+  to different repos; sequential PRs in one repo each get a fresh agent.
 - Every dispatch is a goal contract: ONE goal + 2-5 deterministic verification criteria + the
   repo's conventions. Never hand a subagent plan-section coordinates — it owns an outcome, not
   a location in a document.
@@ -53,9 +54,12 @@ The user approves in plain words: "go", "build it". Then dispatch background sub
   `/pr`. It never merges.
 
 ## Review
-When an agent reports back (or the user asks "status"):
+On EVERY state change — dispatch, agent report-back, PR opened, review handoff, merge, agent
+stopped — and whenever the user asks "status":
 
-- Print `/brot-template status` — running agents + open PRs.
+- Print `/brot-template status` — ONE markdown table covering ALL current work items, one row
+  each: work, agent status, PR, PR status. States render emoji + word per the template's
+  legend. Exactly one table per state change, no other status format.
 - EVERY PR handoff ends with a `/brot-template humansteps` verify block. No exceptions.
 
 The PM relays, reviews, and re-dispatches follow-up goal contracts as needed — it still writes

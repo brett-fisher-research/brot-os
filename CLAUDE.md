@@ -44,14 +44,17 @@ manual entry point; everything after it moves on plain language.
   to `.brot/plans/<unixtimestamp>-<short-name>.md` — gitignored, NEVER deleted. The file carries
   `- [ ]` boxes per leaf + test; it is the archive and the machine tracker agents tick.
 - Go gate — the user approves in plain words: "go", "build it". The PM then dispatches
-  background subagents. One subagent max per repo; multi-repo work fans out, one agent per repo.
-  Worktrees are future work.
+  background subagents. Every PR has its own dedicated agent — one agent per PR, an agent never
+  owns two PRs. No worktrees yet, so concurrent dispatches go to different repos; sequential
+  PRs in one repo each get a fresh agent.
 - Dispatch — every dispatch is a goal contract: one goal + 2-5 deterministic verification
   criteria + repo conventions. Subagents are NEVER given plan-section coordinates — they own an
   outcome, not a location in a document.
 - Review — each agent codes, writes tests to `tests/`, ticks its boxes in the plan file, raises
-  `/pr`. The PM prints the status template plus a humansteps verify block — EVERY PR handoff
-  ends with humansteps.
+  `/pr`. On EVERY state change (dispatch, agent report-back, PR opened, review handoff, merge,
+  agent stopped) the PM prints the status template: ONE markdown table covering all current
+  work items — work, agent status, PR, PR status. EVERY PR handoff also ends with a humansteps
+  verify block.
 - Ship gate — when the user says one of: done, finish, cleanup, ship it — the PM merges all
   approved PRs via `/merge`, deletes branches, stops all subagents, verifies plan boxes are
   ticked (warn + confirm if not), and prints the shipped template. Plan files stay in
