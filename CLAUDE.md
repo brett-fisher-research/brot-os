@@ -105,6 +105,10 @@ mechanics:
 - If a skill is hand-rolling steps a script could own, that's a bug: move the mechanics into a
   script and have the skill drive it.
 
+## Glossary
+These are some of the following terms I will use in our chats:
+- CC or cc = Claude Code
+
 ## Tenant sync
 
 `sync.manifest.json` (tracked, at root) maps tenant dirs to their remotes. `npm run sync` reads
