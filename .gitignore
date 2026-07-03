@@ -16,3 +16,6 @@ HIVE.md
 
 # plan archive + machine trackers (never deleted, never tracked)
 .brot/
+
+# dev-server + browser console output (/brot-dev, /brot-peek)
+.logs/
