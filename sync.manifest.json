@@ -1,5 +1,6 @@
 [
   { "dir": "dotfiles/nvim-conf", "repo": "https://github.com/brett-fisher-research/nvim-conf.git" },
   { "dir": "dotfiles/tmux-conf", "repo": "https://github.com/brett-fisher-research/tmux-conf.git" },
-  { "dir": "dotfiles/wezterm-conf", "repo": "https://github.com/brett-fisher-research/wezterm-conf.git" }
+  { "dir": "dotfiles/wezterm-conf", "repo": "https://github.com/brett-fisher-research/wezterm-conf.git" },
+  { "dir": "projects/duree", "repo": "https://github.com/Fisher-Research/duree.git" }
 ]
