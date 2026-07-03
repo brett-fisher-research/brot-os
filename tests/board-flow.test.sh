@@ -79,6 +79,7 @@ check "plan template has a verification section" "grep -qi 'verification' $PLAN"
 # --- status template ----------------------------------------------------------
 STATUS=$TDIR/status.md
 check "status template exists" "[ -f $STATUS ]"
+check "status template prints on every state change" "grep -qi 'every state change' $STATUS"
 check "status template carries the work-item table header" "grep -qF '| Work | Agent | PR | PR status |' \$STATUS"
 check "status template keeps the agent-state legend" "grep -q 'working' \$STATUS && grep -q 'raising PR' \$STATUS"
 

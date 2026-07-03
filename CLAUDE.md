@@ -62,7 +62,9 @@ manual entry point; everything after it moves on plain language.
 
 Support — `/brot-dev` runs the hot-reloaded dev server once in a background agent (logs to a
 gitignored `.logs/`). Brot skills live in-repo under `.claude/skills/` (`brot-*`), git-tracked
-and native to brot-os.
+and native to brot-os. When debugging anything with a UI, agents proactively screenshot and
+read the console via the chrome-devtools MCP (`/brot-peek`) BEFORE asking the user for a
+screenshot. Setup prerequisite: Chrome installed per machine.
 
 ## The PM rule (standing constitution)
 
