@@ -36,4 +36,5 @@ For example, if a `goal` template only shows one goal, but in the context I am a
 - `plan` — the board's plan proposal: goal, phases of numbered one-line leaves + tests, verification (file copy in `.brot/plans/` carries checkboxes).
 - `humansteps` — the fixed-format manual-steps contract (setup | verify); mandatory verify block on every PR handoff.
 - `status` — the PM's mid-build report: running agents + open PRs.
+- `initiative` — a long-term AI+human goal tracker in `.brot/initiatives/<slug>.md`: status header, milestones, dated log.
 - `shipped` — the ship-gate closing report: merged, stopped, plan archive.
