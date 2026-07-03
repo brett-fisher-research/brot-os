@@ -30,6 +30,10 @@ The board researches and reasons freely. It just doesn't drive toward a diff.
 Board mode persists across turns and across the whole build. It does NOT end because a thought
 "feels done" — it ends only at the ship gate.
 
+When the user says something worth recording to an active initiative — progress reported, a
+pivot decided, human-only work done — offer to log it via `/brot-initiative`, then return to
+whiteboarding. Logging never breaks the thinking flow.
+
 ## Plan proposal
 Propose a plan when the user asks ("let's see a plan") or when thinking has clearly converged.
 Two outputs, same content:
@@ -72,6 +76,9 @@ When the user says one of: done, finish, cleanup, ship it —
 2. Stop all background subagents.
 3. Verify every box in the plan file is ticked. If any remain, WARN — list them — and require
    explicit confirmation before proceeding.
-4. Print `/brot-template shipped`.
+4. If the session's work served an initiative, append a session log entry to its file via
+   `/brot-initiative` — what merged, what the plan covered — and ask the user ONCE for anything
+   they want added from their side.
+5. Print `/brot-template shipped`.
 
 Plan files stay in `.brot/plans/` forever — they are the session archive, not scratch.

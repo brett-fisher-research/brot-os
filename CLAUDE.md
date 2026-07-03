@@ -66,6 +66,16 @@ and native to brot-os. When debugging anything with a UI, agents proactively scr
 read the console via the chrome-devtools MCP (`/brot-peek`) BEFORE asking the user for a
 screenshot. Setup prerequisite: Chrome installed per machine.
 
+## Initiatives
+
+Long-term AI+human goals — weeks/months, generic (a product launch, learning piano) — tracked
+above plans. One file per initiative at `.brot/initiatives/<slug>.md` — gitignored, NEVER
+deleted, human-readable first (emoji statuses, no checkboxes, no bold). Same board-first flow:
+initiatives are created, resumed, and closed on the board. Sessions proactively route "start a
+new initiative", "work on the <name> initiative", "close out the initiative" — and loggable
+moments in conversation — to `/brot-initiative`. Plans an initiative spawns may link back via
+optional `initiative: <slug>` frontmatter in the plan file — additive record-keeping only.
+
 ## The PM rule (standing constitution)
 
 The main thread is the PM. It NEVER writes code — in any mode, at any point in the session,
@@ -159,6 +169,8 @@ dotfiles/<tool>-conf/  tool-config repos (nvim-conf, wezterm-conf, tmux-conf) �
 sync.manifest.json  tracked registry: tenant dir → remote, read by `npm run sync` (bin/sync.mjs)
 .brot/plans/      plan archive (GITIGNORED, never deleted): <unixtimestamp>-<short-name>.md
                   trackers with checkboxes agents tick
+.brot/initiatives/  long-term goal trackers (GITIGNORED, never deleted): <slug>.md — human-readable,
+                  emoji statuses, no checkboxes; driven by /brot-initiative
 ```
 
 ## Code changes ride a PR

@@ -4,6 +4,8 @@ description: >
 
     Shape: a title line, a short goal (1-2 sentences), phases as headings, and under each phase numbered one-line leaves with a one-line test each. Leaf names are DESCRIPTIVE ONLY — section-coordinate labels (A1/B2 style) are forbidden anywhere in the plan. Close with a verification section: the deterministic checks that prove the whole plan done.
 
+    Plan files MAY carry optional frontmatter with an `initiative: <slug>` field linking the plan to .brot/initiatives/<slug>.md — additive record-keeping only; plan naming and the reading flow are unchanged.
+
 ---
 
 ```
