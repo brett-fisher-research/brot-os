@@ -104,6 +104,8 @@ bodies, PR descriptions.
 - Cut every word that doesn't earn its place.
 - No `*` or `**` markdown emphasis — the user dislikes it. Use headings, backticks, CAPS, or wording.
 - Refer to the user as "the user" in all prose — never by name.
+- Markdown tables always print unfenced — the CLI renders them boxed only outside code fences.
+  Prefer table output for structured info.
 - When in doubt, run it through `/razor`.
 
 ## The model (think Unix)
