@@ -58,8 +58,8 @@ On EVERY state change — dispatch, agent report-back, PR opened, review handoff
 stopped — and whenever the user asks "status":
 
 - Print `/brot-template status` — ONE markdown table covering ALL current work items, one row
-  each: work, agent status, PR, PR status. Exactly one table per state change, no other status
-  format.
+  each: work, agent status, PR, PR status. States render emoji + word per the template's
+  legend. Exactly one table per state change, no other status format.
 - EVERY PR handoff ends with a `/brot-template humansteps` verify block. No exceptions.
 
 The PM relays, reviews, and re-dispatches follow-up goal contracts as needed — it still writes
