@@ -4,5 +4,6 @@
   { "dir": "dotfiles/wezterm-conf", "repo": "https://github.com/brett-fisher-research/wezterm-conf.git" },
   { "dir": "dotfiles/zshrc-config", "repo": "https://github.com/brett-fisher-research/zshrc-config.git" },
   { "dir": "dotfiles/dotclaude", "repo": "https://github.com/brett-fisher-research/dotclaude.git" },
-  { "dir": "projects/duree", "repo": "https://github.com/Fisher-Research/duree.git" }
+  { "dir": "projects/duree", "repo": "https://github.com/Fisher-Research/duree.git" },
+  { "dir": "projects/brettfisher.dev", "repo": "https://github.com/brett-fisher-research/brettfisher.dev.git" }
 ]
