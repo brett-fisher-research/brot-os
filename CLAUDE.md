@@ -125,6 +125,7 @@ bodies, PR descriptions.
 - Dense, skimmable, high-signal. Section heads, bullets, nested bullets, tables — not paragraphs.
 - Cut every word that doesn't earn its place.
 - No `*` or `**` markdown emphasis — the user dislikes it. Use headings, backticks, CAPS, or wording.
+- No em dashes (`—`) in prose you write; a plain hyphen `-` is fine. Existing em dashes stay.
 - Refer to the user as "the user" in all prose — never by name.
 - Markdown tables always print unfenced — the CLI renders them boxed only outside code fences.
   Prefer table output for structured info.
