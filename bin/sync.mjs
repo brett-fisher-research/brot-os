@@ -139,8 +139,13 @@ for (const entry of manifest) {
   }
 }
 
-// drift: dirs inside manifest-covered containers that no entry claims
-const containers = [...new Set(manifest.map((e) => dirname(resolve(BASE, e.dir))))];
+// drift: dirs inside manifest-covered containers that no entry claims.
+// A container is the parent dir of an entry (e.g. dotfiles/ for dotfiles/nvim-conf).
+// BASE (the brot-os root) is NEVER a container: a tenant that lives directly at the
+// root (e.g. .brot) makes dirname resolve to BASE, which would scan the whole root
+// and flag every top-level kernel dir (bin/, config/, systemd/, ...) as unlisted noise.
+const containers = [...new Set(manifest.map((e) => dirname(resolve(BASE, e.dir))))]
+  .filter((c) => c !== BASE);
 const listed = new Set(manifest.map((e) => resolve(BASE, e.dir)));
 const unlisted = [];
 for (const c of containers) {
