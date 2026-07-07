@@ -1,4 +1,5 @@
 [
+  { "dir": ".brot", "repo": "https://github.com/brett-fisher-research/dotbrot.git" },
   { "dir": "dotfiles/nvim-conf", "repo": "https://github.com/brett-fisher-research/nvim-conf.git" },
   { "dir": "dotfiles/tmux-conf", "repo": "https://github.com/brett-fisher-research/tmux-conf.git" },
   { "dir": "dotfiles/wezterm-conf", "repo": "https://github.com/brett-fisher-research/wezterm-conf.git" },
