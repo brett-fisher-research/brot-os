@@ -5,6 +5,8 @@
 //   - dir missing        -> git clone <repo> <dir>
 //   - dir clean          -> fetch --prune, land on the default branch, ff to remote
 //   - dir dirty          -> skip, flag `dirty` (never touch a dirty repo)
+//   - dir exists but is a plain dir inside a parent repo (not its own repo root)
+//                        -> `failed` (git would walk up and falsely sync the parent)
 //   - tenant defines a `setup` npm script -> npm run setup --prefix <dir>
 //
 // Clean-repo recovery: a clone left on an orphaned feature branch (its upstream
@@ -24,7 +26,7 @@
 // dirty/unlisted are warnings and exit 0 — resolving them is /brot-sync's job.
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -39,6 +41,15 @@ function run(cmd, args, opts = {}) {
 
 function git(dir, ...args) {
   return run('git', ['-C', dir, ...args]);
+}
+
+// Path equality after symlink resolution (macOS /tmp -> /private/tmp).
+function samePath(a, b) {
+  try {
+    return realpathSync(a) === realpathSync(b);
+  } catch {
+    return false;
+  }
 }
 
 // The repo's default branch, from origin/HEAD; set it if unset, fall back to main.
@@ -77,6 +88,18 @@ for (const entry of manifest) {
     }
     res.status = 'cloned';
   } else {
+    // guard: the dir must be its OWN repo root. A plain dir inside a parent repo
+    // (e.g. .brot/ created by hand inside brot-os) makes every `git -C <dir>` walk
+    // up to the parent — the engine would sync/report the PARENT and print a false
+    // `synced` while the tenant was never cloned. realpath both sides before
+    // comparing (macOS /tmp is a symlink to /private/tmp).
+    const top = git(dir, 'rev-parse', '--show-toplevel');
+    if (top.ok && !samePath(top.out, dir) && !existsSync(join(dir, '.git'))) {
+      res.status = 'failed';
+      res.detail = `exists but is not a git clone of ${entry.repo} — move it aside and re-run`;
+      hardFailure = true;
+      continue;
+    }
     const st = git(dir, 'status', '--porcelain');
     if (!st.ok) {
       res.status = 'failed';
