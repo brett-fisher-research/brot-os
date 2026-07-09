@@ -44,13 +44,17 @@ export function serviceLabel(s: StatusEntry): string {
   return bits.join(' ').trimEnd();
 }
 
-// Top-level picker: one entry per service plus refresh/quit.
-export function serviceChoices(snap: Snapshot): Choice<string | 'refresh' | 'quit'>[] {
-  const rows: Choice<string | 'refresh' | 'quit'>[] = snap.services.map((s) => ({
-    name: serviceLabel(s),
-    value: s.name,
-  }));
-  rows.push({ name: 'refresh', value: 'refresh' }, { name: 'quit', value: 'quit' });
+// Top-level picker: one entry per service plus refresh/quit, and shutdown of
+// the daemon itself when one is actually running.
+export function serviceChoices(
+  snap: Snapshot,
+): Choice<string | 'refresh' | 'shutdown-daemon' | 'quit'>[] {
+  const rows: Choice<string | 'refresh' | 'shutdown-daemon' | 'quit'>[] = snap.services.map(
+    (s) => ({ name: serviceLabel(s), value: s.name }),
+  );
+  rows.push({ name: 'refresh', value: 'refresh' });
+  if (snap.daemonUp) rows.push({ name: 'shutdown brotd (stop everything)', value: 'shutdown-daemon' });
+  rows.push({ name: 'quit', value: 'quit' });
   return rows;
 }
 

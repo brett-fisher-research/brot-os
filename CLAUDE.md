@@ -173,8 +173,12 @@ exponential backoff (cap 30s), and answers a local control socket. Kernel pieces
   service, start/stop/restart/enable/disable/tail logs). Flag verbs print plain greppable text
   for AI use: `npm run services -- status`, `logs <name> [-n N]` (default 200),
   `start|stop|restart <name>` (auto-starts brotd detached if down),
-  `enable|disable <name>` (edits `.brot/services.local.json`), `install-boot`.
+  `enable|disable <name>` (edits `.brot/services.local.json`), `shutdown` (stops all children
+  cleanly and exits brotd; non-zero if no daemon), `install-boot`.
   Unknown names and failed actions exit non-zero.
+- Child PATH - every spawned service's PATH gets the daemon's own node dir
+  (`dirname(process.execPath)`) prepended (deduped, platform delimiter), so `node ...` cmds
+  resolve even when brotd was launched from a minimal boot environment (systemd shim).
 - Logs - each service's stdout/stderr appends to `.logs/services/<name>.log` (rotated to
   `.log.1` past ~5MB); `logs` reads the file directly, so it works with brotd down.
 - Boot - `install-boot` writes the idempotent per-OS login shim whose only job is launching
