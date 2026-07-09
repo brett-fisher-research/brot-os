@@ -58,7 +58,8 @@ beforeAll(async () => {
   write('.brot/services.local.json', JSON.stringify({ enabled: ['crashy', 'steady'] }));
 
   // Stale-socket recovery: a dead leftover socket file must not block startup.
-  write('.logs/services/brotd.sock', '');
+  mkdirSync(dirname(socketPath(root)), { recursive: true });
+  writeFileSync(socketPath(root), '');
 
   daemon = spawn(process.execPath, ['--import', 'tsx', BROTD], {
     cwd: REPO,

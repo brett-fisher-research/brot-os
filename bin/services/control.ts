@@ -7,6 +7,7 @@
 
 import { createHash } from 'node:crypto';
 import { createConnection } from 'node:net';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 export function logDir(root: string): string {
@@ -18,11 +19,13 @@ export function logFile(root: string, name: string): string {
 }
 
 export function socketPath(root: string): string {
-  if (process.platform === 'win32') {
-    const hash = createHash('sha1').update(root).digest('hex').slice(0, 12);
-    return `\\\\.\\pipe\\brotd-${hash}`;
-  }
-  return join(logDir(root), 'brotd.sock');
+  const hash = createHash('sha1').update(root).digest('hex').slice(0, 12);
+  if (process.platform === 'win32') return `\\\\.\\pipe\\brotd-${hash}`;
+  const preferred = join(logDir(root), 'brotd.sock');
+  // unix socket paths cap out around 104-108 bytes; deep roots fall back to a
+  // tmpdir socket keyed by the root hash, deterministic for daemon and CLI.
+  if (Buffer.byteLength(preferred) <= 100) return preferred;
+  return join(tmpdir(), `brotd-${hash}.sock`);
 }
 
 export type ServiceState = 'running' | 'backoff' | 'stopping' | 'stopped';
