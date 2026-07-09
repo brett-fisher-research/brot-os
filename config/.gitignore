@@ -1,5 +1,5 @@
 # Patterns are relative to this dir (config/). Ignore everything here except the
-# tracked templates and docs — real secrets (notify.env, cloudflare.env) stay out.
+# tracked templates and docs — real secrets (notify.env) stay out.
 *
 !.gitignore
 !CLAUDE.md
