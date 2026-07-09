@@ -49,6 +49,7 @@ cat > "$TMP/os/manifest.json" <<EOF
   { "dir": ".brot", "repo": "$TENANT_URL" }
 ]
 EOF
+export BROT_SYNC_ROOT="$TMP/os"
 export BROT_SYNC_MANIFEST="$TMP/os/manifest.json"
 
 out="$(node bin/sync.mjs 2>&1)"; rc=$?

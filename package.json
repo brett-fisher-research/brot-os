@@ -1,8 +1,20 @@
 {
   "name": "brot-os",
   "private": true,
+  "type": "module",
   "scripts": {
     "test": "bash tests/run.sh",
+    "test:unit": "vitest run",
+    "setup": "tsx bin/setup.ts",
     "sync": "node bin/sync.mjs"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   }
 }

@@ -28,6 +28,7 @@ EOF
 mkdir -p "$TMP/os/tenants/rogue"   # unlisted sibling dir
 REMOTE_URL="$(echo "$TMP/remote.git" | sed 's|\\|/|g')"
 printf '[ { "dir": "tenants/fix", "repo": "%s" } ]\n' "$REMOTE_URL" > "$TMP/os/manifest.json"
+export BROT_SYNC_ROOT="$TMP/os"
 export BROT_SYNC_MANIFEST="$TMP/os/manifest.json"
 
 out="$(node bin/sync.mjs 2>&1)"; rc=$?
