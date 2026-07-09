@@ -55,7 +55,32 @@ beforeAll(async () => {
     'services/steady/brot.service.json',
     JSON.stringify({ name: 'steady', cmd: 'node serve.js', port: 3999 }),
   );
-  write('.brot/services.local.json', JSON.stringify({ enabled: ['crashy', 'steady'] }));
+  // envy: repo-relative envFile (.env in its own repo), ../ traversal to a
+  // sibling dir, and a missing file that must warn without blocking the spawn.
+  write(
+    'services/envy/show-env.js',
+    "console.log('envy FROM_REPO=' + process.env.FROM_REPO + ' FROM_SIBLING=' + process.env.FROM_SIBLING); setInterval(() => {}, 1000);",
+  );
+  write('services/envy/.env', 'FROM_REPO=repo-value');
+  write('services/shared/x.env', 'FROM_SIBLING=sibling-value');
+  write(
+    'services/envy/brot.service.json',
+    JSON.stringify({
+      name: 'envy',
+      cmd: 'node show-env.js',
+      envFile: ['.env', '../shared/x.env', 'missing.env'],
+    }),
+  );
+  // localdef: inline local def, relative envFile resolves against the brot-os root.
+  write('local.js', "console.log('localdef FROM_ROOT=' + process.env.FROM_ROOT); setInterval(() => {}, 1000);");
+  write('local.env', 'FROM_ROOT=root-value');
+  write(
+    '.brot/services.local.json',
+    JSON.stringify({
+      enabled: ['crashy', 'steady', 'envy', 'localdef'],
+      defs: [{ name: 'localdef', cmd: 'node local.js', envFile: 'local.env' }],
+    }),
+  );
 
   // Stale-socket recovery: a dead leftover socket file must not block startup.
   mkdirSync(dirname(socketPath(root)), { recursive: true });
@@ -126,6 +151,33 @@ describe('brotd supervisor', () => {
     const after = (await status()).find((e) => e.name === 'crashy');
     expect(after?.state).toBe('stopped');
     expect(after?.restarts).toBe(before?.restarts);
+  });
+
+  it('resolves relative envFile paths against the service repo root, including ../ traversal', async () => {
+    const out = await waitFor(async () => {
+      const log = readFileSync(logFile(root, 'envy'), 'utf8');
+      return log.includes('FROM_REPO=') ? log : undefined;
+    });
+    expect(out).toContain('FROM_REPO=repo-value');
+    expect(out).toContain('FROM_SIBLING=sibling-value');
+  });
+
+  it('warns about a missing envFile in the service log and still starts the service', async () => {
+    const entry = await waitFor(async () => {
+      const s = (await status()).find((e) => e.name === 'envy');
+      return s && s.state === 'running' ? s : undefined;
+    });
+    expect(entry.pid).toBeGreaterThan(0);
+    const log = readFileSync(logFile(root, 'envy'), 'utf8');
+    expect(log).toContain(`[brotd] envFile not found, skipped: ${join(root, 'services', 'envy', 'missing.env')}`);
+  });
+
+  it('resolves an inline local def envFile against the brot-os root', async () => {
+    const out = await waitFor(async () => {
+      const log = readFileSync(logFile(root, 'localdef'), 'utf8');
+      return log.includes('FROM_ROOT=') ? log : undefined;
+    });
+    expect(out).toContain('FROM_ROOT=root-value');
   });
 
   it('rejects control commands for unknown services', async () => {

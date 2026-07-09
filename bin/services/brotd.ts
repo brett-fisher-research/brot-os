@@ -91,17 +91,32 @@ export function parseEnvFile(content: string): Record<string, string> {
 }
 
 // A service's repo root: the tenant dir for repo defs, the brot-os root for
-// inline local defs. def.cwd resolves against it.
+// inline local defs. Everything path-like in a def (cwd, relative envFile
+// entries) resolves against it.
+export function serviceRepoRoot(ks: KnownService, root: string): string {
+  return ks.source === 'local' ? root : join(root, ks.source);
+}
+
 export function serviceCwd(ks: KnownService, root: string): string {
-  const repoRoot = ks.source === 'local' ? root : join(root, ks.source);
+  const repoRoot = serviceRepoRoot(ks, root);
   return ks.def.cwd ? resolve(repoRoot, ks.def.cwd) : repoRoot;
 }
 
-function buildEnv(ks: KnownService, root: string): NodeJS.ProcessEnv {
+// Relative envFile paths resolve against the service's repo root (same base as
+// cwd); absolute and ~-expanded paths pass through. A listed file that is
+// missing warns via `warn` and is skipped; the spawn still proceeds.
+export function buildEnv(
+  ks: KnownService,
+  root: string,
+  warn: (line: string) => void = () => {},
+): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = { ...process.env };
   for (const file of ks.def.envFile ?? []) {
-    const path = resolve(root, file);
-    if (!existsSync(path)) continue;
+    const path = resolve(serviceRepoRoot(ks, root), file);
+    if (!existsSync(path)) {
+      warn(`envFile not found, skipped: ${path}`);
+      continue;
+    }
     Object.assign(env, parseEnvFile(readFileSync(path, 'utf8')));
   }
   Object.assign(env, ks.def.env);
@@ -139,10 +154,14 @@ class Supervisor {
     const path = logFile(this.root, m.ks.def.name);
     this.rotate(path);
     const log = createWriteStream(path, { flags: 'a' });
+    const env = buildEnv(m.ks, this.root, (line) => {
+      log.write(`[brotd] ${line}\n`);
+      console.error(`[${new Date().toISOString()}] ${m.ks.def.name}: ${line}`);
+    });
     const child = spawn(m.ks.def.cmd, {
       shell: true,
       cwd: serviceCwd(m.ks, this.root),
-      env: buildEnv(m.ks, this.root),
+      env,
       detached: process.platform !== 'win32',
       stdio: ['ignore', 'pipe', 'pipe'],
     });
