@@ -157,6 +157,9 @@ exponential backoff (cap 30s), and answers a local control socket. Kernel pieces
 
   - `name` + `cmd` required; `cwd` repo-root-relative; `envFile` a string or array
     (normalized to an array); `port` display metadata only.
+  - Relative `envFile` paths resolve against the service's repo root (inline local defs: the
+    brot-os root, same base as `cwd`); a listed file missing at spawn logs a one-line warning
+    and is skipped, the spawn proceeds.
   - A file holds ONE def object or an array of defs (multi-app repos).
   - Unknown keys and missing `name`/`cmd` reject with named errors.
   - `~` at the start of a `cmd` path argument or an `envFile` path expands to the home dir.
