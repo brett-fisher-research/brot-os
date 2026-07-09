@@ -54,8 +54,9 @@ The user approves in plain words: "go", "build it". Then dispatch background sub
 - Every dispatch is a goal contract: ONE goal + 2-5 deterministic verification criteria + the
   repo's conventions. Never hand a subagent plan-section coordinates — it owns an outcome, not
   a location in a document.
-- Each agent codes, writes tests to `tests/`, ticks its own boxes in the plan file, and raises
-  `/brot-pr`. It never merges.
+- Each agent codes, writes BEHAVIOR tests to `tests/` (given input, assert output/effect - a test
+  reads as documentation; no tombstones, no prose-greps), ticks its own boxes in the plan file,
+  and raises `/brot-pr`. It never merges.
 
 ## Review
 On EVERY state change — dispatch, agent report-back, PR opened, review handoff, merge, agent
