@@ -38,6 +38,13 @@ export function colorEnabled(isTTY: boolean, env: NodeJS.ProcessEnv): boolean {
   return isTTY && env.NO_COLOR === undefined;
 }
 
+// Inquirer raises ExitPromptError for ctrl-c and ctrl-d (EOF); both mean the
+// user left the menu, not a failure. Detected by name so it survives
+// @inquirer version drift. Anything else rethrows.
+export function isPromptExit(err: unknown): boolean {
+  return err instanceof Error && err.name === 'ExitPromptError';
+}
+
 const ANSI = { green: '32', red: '31', dim: '90' } as const;
 
 function paint(s: string, code: keyof typeof ANSI, on: boolean): string {

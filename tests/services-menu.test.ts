@@ -9,6 +9,7 @@ import {
   colorEnabled,
   dispatch,
   headerLine,
+  isPromptExit,
   serviceChoices,
   serviceLabel,
 } from '../bin/services/menu.js';
@@ -141,5 +142,20 @@ describe('colors', () => {
     expect(colorEnabled(true, { NO_COLOR: '1' })).toBe(false);
     expect(colorEnabled(true, { NO_COLOR: '' })).toBe(false);
     expect(colorEnabled(false, {})).toBe(false);
+  });
+});
+
+describe('prompt exit classifier', () => {
+  it('ExitPromptError-named errors (ctrl-c/ctrl-d from inquirer) exit clean', () => {
+    const err = new Error('User force closed the prompt');
+    err.name = 'ExitPromptError';
+    expect(isPromptExit(err)).toBe(true);
+  });
+
+  it('anything else rethrows', () => {
+    expect(isPromptExit(new Error('socket hang up'))).toBe(false);
+    expect(isPromptExit(new TypeError('bad'))).toBe(false);
+    expect(isPromptExit('ExitPromptError')).toBe(false);
+    expect(isPromptExit(undefined)).toBe(false);
   });
 });

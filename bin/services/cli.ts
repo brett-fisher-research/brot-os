@@ -36,6 +36,7 @@ import {
   colorEnabled,
   dispatch,
   headerLine,
+  isPromptExit,
   serviceChoices,
 } from './menu.js';
 import { bootShimPlan, daemonStartPlan, shimMarkerPath } from './shim.js';
@@ -260,7 +261,18 @@ async function runDispatch(root: string, d: Dispatch): Promise<void> {
   }
 }
 
+// Ctrl-c and ctrl-d inside a prompt surface as ExitPromptError: leave clean,
+// exit 0. Real errors still rethrow.
 async function interactive(root: string): Promise<void> {
+  try {
+    await interactiveLoop(root);
+  } catch (err) {
+    if (!isPromptExit(err)) throw err;
+    console.log('bye');
+  }
+}
+
+async function interactiveLoop(root: string): Promise<void> {
   const { select } = await import('@inquirer/prompts');
   const color = colorEnabled(Boolean(process.stdout.isTTY), process.env);
   for (;;) {
