@@ -169,13 +169,21 @@ exponential backoff (cap 30s), and answers a local control socket. Kernel pieces
   `{ "enabled": ["bookshelf"], "defs": [...] }`. A service runs iff its name is in `enabled`.
   Inline `defs` are the escape hatch for host-local one-offs with no repo (source `local`).
   Missing file: nothing enabled, no crash.
-- CLI - bare `npm run services` is the human face: an interactive loop (live status, pick a
-  service, start/stop/restart/enable/disable/tail logs). Flag verbs print plain greppable text
-  for AI use: `npm run services -- status`, `logs <name> [-n N]` (default 200),
-  `start|stop|restart <name>` (auto-starts brotd detached if down),
-  `enable|disable <name>` (edits `.brot/services.local.json`), `shutdown` (stops all children
-  cleanly and exits brotd; non-zero if no daemon), `install-boot`.
-  Unknown names and failed actions exit non-zero.
+- CLI - bare `npm run services` is the human face: an interactive loop with a brotd header
+  line (green running with pid + via shim/detached, red not running), colored service states
+  (green running, red backoff/stopped-while-enabled, dim disabled; ANSI off when not a TTY or
+  NO_COLOR is set), pick a service, start/stop/restart/enable/disable/tail logs. Daemon down:
+  "start brotd" leads the menu and control actions hide until it is up. Flag verbs print plain
+  uncolored greppable text for AI use: `npm run services -- status`, `logs <name> [-n N]`
+  (default 200), `start|stop|restart <name>` (auto-starts brotd if down), `daemon-start`
+  (brings brotd up on its own), `enable|disable <name>` (edits `.brot/services.local.json`),
+  `shutdown` (stops all children cleanly and exits brotd; non-zero if no daemon),
+  `install-boot`. Unknown names and failed actions exit non-zero.
+- Daemon start routing - anything that brings brotd up (`daemon-start`, `start <name>`, the
+  menu) checks for the platform's boot shim: present, it starts brotd THROUGH the init system
+  (`systemctl --user start brotd` / `launchctl load` / `schtasks /Run`) so the init owns the
+  process; absent, it falls back to a detached spawn. Fixture roots (`BROT_SERVICES_ROOT`)
+  always spawn detached - the shim only serves the real OS root.
 - Child PATH - every spawned service's PATH gets the daemon's own node dir
   (`dirname(process.execPath)`) prepended (deduped, platform delimiter), so `node ...` cmds
   resolve even when brotd was launched from a minimal boot environment (systemd shim).

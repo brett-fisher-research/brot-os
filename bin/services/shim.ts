@@ -35,6 +35,7 @@ function linuxPlan({ home, repoRoot, nodePath, path }: ShimInputs): ShimPlan {
     '',
     '[Service]',
     `Environment=PATH=${path}`,
+    'Environment=BROTD_VIA=shim',
     `ExecStart=${nodePath} --import tsx ${repoRoot}/bin/services/brotd.ts`,
     `WorkingDirectory=${repoRoot}`,
     'Restart=on-failure',
@@ -78,6 +79,7 @@ function darwinPlan({ home, repoRoot, nodePath, path }: ShimInputs): ShimPlan {
     '  <key>EnvironmentVariables</key>',
     '  <dict>',
     `    <key>PATH</key><string>${xmlEscape(path)}</string>`,
+    '    <key>BROTD_VIA</key><string>shim</string>',
     '  </dict>',
     '  <key>RunAtLoad</key><true/>',
     `  <key>StandardOutPath</key><string>${repoRoot}/.logs/services/brotd-boot.log</string>`,
@@ -102,6 +104,7 @@ function win32Plan({ home, repoRoot, nodePath, path }: ShimInputs): ShimPlan {
   const cmd = [
     '@echo off',
     `set "PATH=${path}"`,
+    'set "BROTD_VIA=shim"',
     `cd /d "${repoRoot}"`,
     `"${nodePath}" --import tsx "${repoRoot}\\bin\\services\\brotd.ts"`,
     '',
@@ -123,5 +126,41 @@ export function bootShimPlan(inputs: ShimInputs): ShimPlan {
       return darwinPlan(inputs);
     case 'win32':
       return win32Plan(inputs);
+  }
+}
+
+// The on-disk marker install-boot leaves behind; its existence means the init
+// system owns brotd on this host.
+export function shimMarkerPath(platform: ShimPlatform, home: string): string {
+  switch (platform) {
+    case 'linux':
+      return `${home}/.config/systemd/user/brotd.service`;
+    case 'darwin':
+      return `${home}/Library/LaunchAgents/dev.brot.brotd.plist`;
+    case 'win32':
+      return `${home}\\AppData\\Local\\brot\\brotd.cmd`;
+  }
+}
+
+// Daemon-start routing - pure. Shim installed: start through the init system
+// so it owns the process (restarts, boot). No shim: caller falls back to the
+// existing detached spawn.
+export type DaemonStartPlan =
+  | { kind: 'init'; argv: string[] }
+  | { kind: 'detached' };
+
+export function daemonStartPlan(
+  platform: ShimPlatform,
+  home: string,
+  shimPresent: boolean,
+): DaemonStartPlan {
+  if (!shimPresent) return { kind: 'detached' };
+  switch (platform) {
+    case 'linux':
+      return { kind: 'init', argv: ['systemctl', '--user', 'start', 'brotd.service'] };
+    case 'darwin':
+      return { kind: 'init', argv: ['launchctl', 'load', '-w', shimMarkerPath('darwin', home)] };
+    case 'win32':
+      return { kind: 'init', argv: ['schtasks', '/Run', '/TN', 'brotd'] };
   }
 }

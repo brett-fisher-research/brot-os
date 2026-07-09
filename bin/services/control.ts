@@ -48,8 +48,15 @@ export type ControlRequest =
   | { cmd: 'start' | 'stop' | 'restart'; name: string }
   | { cmd: 'shutdown' };
 
+// How brotd itself is running: launched by the boot shim (init system owns the
+// process) or spawned detached by the CLI.
+export interface DaemonInfo {
+  pid: number;
+  via: 'shim' | 'detached';
+}
+
 export type ControlResponse =
-  | { ok: true; services?: StatusEntry[] }
+  | { ok: true; services?: StatusEntry[]; daemon?: DaemonInfo }
   | { ok: false; error: string };
 
 // One request, one JSON-line response, then hang up.
