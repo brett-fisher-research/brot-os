@@ -15,7 +15,7 @@ On entry, print this block:
 
 ## The guard
 
-NEVER reimplement sync logic — no hand-rolled clone/pull/setup loops, no reading the manifest to "do it manually". Always run the script. If the script can't handle a case, fix the script (via /pr), don't work around it.
+NEVER reimplement sync logic — no hand-rolled clone/pull/setup loops, no reading the manifest to "do it manually". Always run the script. If the script can't handle a case, fix the script (via /brot-pr), don't work around it.
 
 ## Run
 
@@ -30,7 +30,7 @@ Every entry should end `cloned` or `synced`, with `setup=ran` where the tenant d
 
 | Report line | What it means | What to do |
 |---|---|---|
-| `dirty <dir>` | Uncommitted tenant changes; engine skipped it | Show the diff; offer: commit via /pr in that tenant, stash, or leave and re-run later |
+| `dirty <dir>` | Uncommitted tenant changes; engine skipped it | Show the diff; offer: commit via /brot-pr in that tenant, stash, or leave and re-run later |
 | `failed ... clone/pull` | Remote unreachable, auth, or diverged history | Diagnose (remote URL, credentials, `git status`); fix and re-run `npm run sync` |
 | `failed ... setup` | Tenant's setup script broke on this host | Run that setup directly for full output; fix the cause (often a missing host tool — name the install command) |
 | `unlisted <dir>` | Repo on disk the manifest doesn't know | Offer to add `{ dir, repo }` to `.brot/sync.manifest.json` (get repo via `git remote get-url origin`) — that edit is committed in the `.brot` workspace repo |

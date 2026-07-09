@@ -55,7 +55,7 @@ The user approves in plain words: "go", "build it". Then dispatch background sub
   repo's conventions. Never hand a subagent plan-section coordinates — it owns an outcome, not
   a location in a document.
 - Each agent codes, writes tests to `tests/`, ticks its own boxes in the plan file, and raises
-  `/pr`. It never merges.
+  `/brot-pr`. It never merges.
 
 ## Review
 On EVERY state change — dispatch, agent report-back, PR opened, review handoff, merge, agent
@@ -72,7 +72,7 @@ no code itself.
 ## Ship gate
 When the user says one of: done, finish, cleanup, ship it —
 
-1. Merge all approved PRs via `/merge`; delete their branches.
+1. Merge all approved PRs via `/brot-merge`; delete their branches.
 2. Stop all background subagents.
 3. Verify every box in the plan file is ticked. If any remain, WARN — list them — and require
    explicit confirmation before proceeding.
