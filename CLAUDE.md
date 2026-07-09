@@ -109,13 +109,31 @@ mechanics:
 These are some of the following terms I will use in our chats:
 - CC or cc = Claude Code
 
+## Two-layer model: framework vs. workspace
+
+brot-os splits into two layers, each its own git repo:
+
+- Framework layer — tracked brot-os: skills, kernel (`bin/`, `systemd/`, `templates/`), this
+  root `CLAUDE.md`, generic packages, `config/*.example`. Shareable, host-agnostic.
+- Workspace layer — `.brot/`: the user's personal machine state. Gitignored by brot-os but its
+  OWN backed-up repo. Holds `sync.manifest.json` (the tenant registry), `plans/`, `initiatives/`.
+  One `.brot` per machine-owner; the framework never hardcodes its contents.
+
+`npm run setup` bootstraps the workspace: an interactive prompt (create a new GitHub repo, point
+at an existing one, or local-only) scaffolds `.brot` with a seeded empty manifest, `plans/`,
+`initiatives/`, a `.gitignore`, and a README. Idempotent — re-running detects an already-
+configured `.brot` and offers to reconfigure rather than clobber.
+
 ## Tenant sync
 
-`sync.manifest.json` (tracked, at root) maps tenant dirs to their remotes. `npm run sync` reads
-it and per entry: clones if missing, ff-only pulls if clean, skips dirty repos, then runs the
-tenant's idempotent `npm run setup` when defined — and reports (including repos on disk the
-manifest doesn't list). `/brot-sync` wraps it with verification and gap-handling. Cross-machine
-flow: pull brot-os, run `/brot-sync` (or `npm run sync`), done.
+The tenant registry lives in the workspace: `.brot/sync.manifest.json` (a JSON array of
+`{ dir, repo }`) maps tenant dirs to their remotes. `npm run sync` pulls the `.brot` workspace
+repo FIRST, then reads that manifest and per entry: clones if missing, ff-only pulls if clean,
+skips dirty repos, then runs the tenant's idempotent `npm run setup` when defined — and reports
+(including repos on disk the manifest doesn't list). Entry dirs resolve against the brot-os ROOT,
+not the manifest's directory. If `.brot` is absent, sync fails soft and points at `npm run setup`.
+`/brot-sync` wraps it with verification and gap-handling. Cross-machine flow: clone brot-os, run
+`npm run setup` (first time) then `/brot-sync` (or `npm run sync`), done.
 
 ## Prose style: razor
 
@@ -179,10 +197,12 @@ experiments/      its OWN separate repo (a tenant, NOT brot-os) holding many sel
 projects/<name>/  promoted, productionized projects — each its own repo
 dotfiles/<tool>-conf/  tool-config repos (nvim-conf, wezterm-conf, tmux-conf) — each its own repo,
                   each with an idempotent `npm run setup`
-sync.manifest.json  tracked registry: tenant dir → remote, read by `npm run sync` (bin/sync.mjs)
-.brot/plans/      plan archive (GITIGNORED, never deleted): <unixtimestamp>-<short-name>.md
+.brot/            the workspace layer (GITIGNORED by brot-os; its OWN backed-up repo).
+                  Bootstrapped by `npm run setup`. Contents:
+.brot/sync.manifest.json  tenant registry: tenant dir → remote, read by `npm run sync` (bin/sync.mjs)
+.brot/plans/      plan archive (never deleted): <unixtimestamp>-<short-name>.md
                   trackers with checkboxes agents tick
-.brot/initiatives/  long-term goal trackers (GITIGNORED, never deleted): <slug>.md — human-readable,
+.brot/initiatives/  long-term goal trackers (never deleted): <slug>.md — human-readable,
                   emoji statuses, no checkboxes; driven by /brot-initiative
 ```
 
