@@ -43,6 +43,15 @@ check "status.md frontmatter says the fence delimits banner art only" \
 check "status.md frontmatter mandates URL link-shortening in cells" \
   "grep -qi 'shorten' '$STATUS' && grep -qF '[#21](url)' '$STATUS'"
 
+# --- every advertised template exists on disk --------------------------------
+# /brot-template reads the `- `name`` list in SKILL.md and opens templates/<name>.md;
+# an advertised name with no file breaks the skill at runtime.
+SKILL=.claude/skills/brot-template/SKILL.md
+for name in $(grep -oE '^- `[a-z]+`' "$SKILL" | tr -d '`-' | tr -d ' '); do
+  check "advertised template $name exists as templates/$name.md" \
+    "[ -f '$TDIR/$name.md' ]"
+done
+
 # --- CLAUDE.md: unfenced-table preference -------------------------------------
 check "CLAUDE.md states tables print unfenced" 'grep -qi "unfenced" CLAUDE.md'
 check "CLAUDE.md prefers table output for structured info" \
