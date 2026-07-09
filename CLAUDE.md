@@ -141,9 +141,11 @@ not the manifest's directory. If `.brot` is absent, sync fails soft and points a
 ## Long-running services
 
 Services declare HOW to run via a generic `brot.service.json` at their repo root; WHETHER they
-run on a host is per-host config in `.brot/services.local.json`. brotd (the supervisor, a
-follow-up PR) consumes both. Kernel pieces: `bin/services/def.ts` (parse + validate),
-`bin/services/discover.ts` (discovery + enablement).
+run on a host is per-host config in `.brot/services.local.json`. brotd (the supervisor,
+`bin/services/brotd.ts`) consumes both: it spawns every enabled service, restarts crashes with
+exponential backoff (cap 30s), and answers a local control socket. Kernel pieces:
+`bin/services/def.ts` (parse + validate), `bin/services/discover.ts` (discovery + enablement),
+`bin/services/brotd.ts` (supervisor), `bin/services/cli.ts` (`npm run services`).
 
 - Schema per def - generic keys only, nothing proxy/tunnel/init-system-specific:
 
@@ -164,9 +166,17 @@ follow-up PR) consumes both. Kernel pieces: `bin/services/def.ts` (parse + valid
   `{ "enabled": ["bookshelf"], "defs": [...] }`. A service runs iff its name is in `enabled`.
   Inline `defs` are the escape hatch for host-local one-offs with no repo (source `local`).
   Missing file: nothing enabled, no crash.
-- CLI verbs (planned, land with brotd): `npm run services` interactive for the human;
-  `npm run services -- status|logs <name> [-n N]|start|stop|restart|enable|disable <name>`
-  plain text for AI use.
+- CLI - bare `npm run services` is the human face: an interactive loop (live status, pick a
+  service, start/stop/restart/enable/disable/tail logs). Flag verbs print plain greppable text
+  for AI use: `npm run services -- status`, `logs <name> [-n N]` (default 200),
+  `start|stop|restart <name>` (auto-starts brotd detached if down),
+  `enable|disable <name>` (edits `.brot/services.local.json`), `install-boot`.
+  Unknown names and failed actions exit non-zero.
+- Logs - each service's stdout/stderr appends to `.logs/services/<name>.log` (rotated to
+  `.log.1` past ~5MB); `logs` reads the file directly, so it works with brotd down.
+- Boot - `install-boot` writes the idempotent per-OS login shim whose only job is launching
+  brotd: systemd user unit on Linux (plus a `loginctl enable-linger` note), launchd plist on
+  macOS, ONLOGON Scheduled Task on Windows.
 
 ## Prose style: razor
 

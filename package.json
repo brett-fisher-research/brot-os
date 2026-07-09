@@ -5,6 +5,7 @@
   "scripts": {
     "test": "vitest run",
     "setup": "tsx bin/setup.ts",
+    "services": "tsx bin/services/cli.ts",
     "sync": "node bin/sync.mjs"
   },
   "dependencies": {
