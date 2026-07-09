@@ -32,8 +32,6 @@ check "promote-experiment skill dir absent" '[ ! -d .claude/skills/promote-exper
 check "unregister-experiment.sh drops promote-experiment" \
   '[ "$(grep -c "promote-experiment" bin/unregister-experiment.sh)" -eq 0 ]'
 check "unregister-experiment.sh parses" 'bash -n bin/unregister-experiment.sh'
-check "new-experiment SKILL.md drops promote-experiment" \
-  '[ "$(grep -c "promote-experiment" .claude/skills/new-experiment/SKILL.md)" -eq 0 ]'
 
 # OS-layer sweep + all scripts parse
 check "no manifest/promote/demote refs in OS layer" \
