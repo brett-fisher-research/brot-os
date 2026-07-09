@@ -28,10 +28,11 @@ git clone -q "$TMP/remote.git" "$TMP/seed" 2>/dev/null
   && git checkout -q -b feature \
   && echo feat > feat.txt && git add . && git commit -qm feat && git push -q origin feature )
 
-# manifest entry dir resolves relative to the manifest's directory
+# manifest entry dir resolves against the brot-os ROOT (BROT_SYNC_ROOT for fixtures)
 mkdir -p "$TMP/os"
 REMOTE_URL="$(echo "$TMP/remote.git" | sed 's|\\|/|g')"
 printf '[ { "dir": "tenants/fix", "repo": "%s" } ]\n' "$REMOTE_URL" > "$TMP/os/manifest.json"
+export BROT_SYNC_ROOT="$TMP/os"
 export BROT_SYNC_MANIFEST="$TMP/os/manifest.json"
 
 # clone the tenant and leave it checked out on the feature branch

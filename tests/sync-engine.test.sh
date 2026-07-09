@@ -22,10 +22,12 @@ git clone -q "$TMP/remote.git" "$TMP/seed" 2>/dev/null
   && git config user.email test@test && git config user.name test \
   && echo one > file.txt && git add . && git commit -qm one && git push -q origin HEAD )
 
-# manifest: entry dir resolves relative to the manifest's directory
+# manifest: entry dir resolves against the brot-os ROOT (BROT_SYNC_ROOT for fixtures),
+# not the manifest's directory
 mkdir -p "$TMP/os/tenants"
 REMOTE_URL="$(echo "$TMP/remote.git" | sed 's|\\|/|g')"
 printf '[ { "dir": "tenants/fix", "repo": "%s" } ]\n' "$REMOTE_URL" > "$TMP/os/manifest.json"
+export BROT_SYNC_ROOT="$TMP/os"
 export BROT_SYNC_MANIFEST="$TMP/os/manifest.json"
 
 # run 1: clones

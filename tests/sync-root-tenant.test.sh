@@ -41,6 +41,7 @@ cat > "$TMP/os/manifest.json" <<EOF
   { "dir": "sub/one", "repo": "$TENANT_URL" }
 ]
 EOF
+export BROT_SYNC_ROOT="$TMP/os"
 export BROT_SYNC_MANIFEST="$TMP/os/manifest.json"
 
 # sibling root-level dirs that must NOT be flagged unlisted (they are kernel-like dirs)
