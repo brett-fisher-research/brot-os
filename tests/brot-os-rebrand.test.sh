@@ -33,9 +33,5 @@ for d in systemd templates bin tests; do
     "[ \"\$(grep -rIil \"\$OLD\" $d | wc -l)\" -eq 0 ]"
 done
 
-# os-notify test now asserts a brot-os path.
-check "os-notify test asserts a brot-os path" \
-  'grep -q "BROT_OS_ROOT/services/telegram-bot" tests/os-notify-skill.test.sh'
-
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

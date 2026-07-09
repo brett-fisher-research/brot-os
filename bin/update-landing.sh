@@ -19,7 +19,7 @@ for slug in $(reg_list_slugs); do
   created="$(reg_field "$slug" created)"
   cards+="<a class=\"card\" href=\"/$slug/\"><span class=\"name\">$slug</span><span class=\"meta\">$type &middot; ${created%T*}</span></a>"
 done
-[ -n "$cards" ] || cards='<p class="empty">No experiments yet. Run <code>/new-experiment</code> from Claude Code.</p>'
+[ -n "$cards" ] || cards='<p class="empty">No experiments yet.</p>'
 
 cat > "$HOME_DIR/index.html" <<HTML
 <!doctype html>
