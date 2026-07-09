@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 // brot-os tenant sync — the deterministic engine behind `npm run sync` and /brot-sync.
 //
-// Reads a manifest (JSON array of { dir, repo }) and, per entry:
+// Two-layer model: the framework layer is tracked brot-os; the workspace layer is `.brot`
+// (gitignored by brot-os, its own backed-up repo). The tenant manifest lives in the workspace:
+// `.brot/sync.manifest.json` (a JSON array of { dir, repo }). Sync pulls `.brot` FIRST, then
+// reads that manifest and, per entry:
 //   - dir missing        -> git clone <repo> <dir>
 //   - dir clean          -> fetch --prune, land on the default branch, ff to remote
 //   - dir dirty          -> skip, flag `dirty` (never touch a dirty repo)
@@ -18,9 +21,14 @@
 // Then flags `unlisted`: subdirectories of any manifest-covered container dir
 // (e.g. dotfiles/) that no manifest entry claims.
 //
-// Manifest path: ./sync.manifest.json next to the brot-os root, overridable via
-// BROT_SYNC_MANIFEST. Entry dirs resolve relative to the manifest's directory,
-// so test fixtures are self-contained.
+// Path model: entry dirs resolve against the brot-os ROOT, NOT against the manifest's
+// directory — the manifest sits in `.brot/` but its dirs (e.g. dotfiles/nvim-conf) are
+// root-relative. ROOT is overridable via BROT_SYNC_ROOT and the manifest path via
+// BROT_SYNC_MANIFEST, so test fixtures stay self-contained. An explicit BROT_SYNC_MANIFEST
+// is "fixture mode": it skips the `.brot` workspace pull and reads that file directly.
+//
+// No `.brot` (production, no override): fail soft — tell the user to run `npm run setup`,
+// exit non-zero. `.brot` present but no manifest: treat as an empty manifest (no crash).
 //
 // Exit code: non-zero only on hard failures (clone/pull/setup errors).
 // dirty/unlisted are warnings and exit 0 — resolving them is /brot-sync's job.
@@ -30,9 +38,14 @@ import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from 'n
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const manifestPath = resolve(process.env.BROT_SYNC_MANIFEST ?? join(ROOT, 'sync.manifest.json'));
-const BASE = dirname(manifestPath);
+const ROOT = resolve(
+  process.env.BROT_SYNC_ROOT ?? resolve(dirname(fileURLToPath(import.meta.url)), '..'),
+);
+// Entry dirs resolve against the brot-os ROOT, never the manifest's directory.
+const BASE = ROOT;
+const overrideManifest = process.env.BROT_SYNC_MANIFEST;
+const brotDir = join(ROOT, '.brot');
+const manifestPath = resolve(overrideManifest ?? join(brotDir, 'sync.manifest.json'));
 
 function run(cmd, args, opts = {}) {
   const r = spawnSync(cmd, args, { encoding: 'utf8', shell: process.platform === 'win32', ...opts });
@@ -62,13 +75,73 @@ function defaultBranch(dir) {
   return head.ok ? head.out.replace(/^origin\//, '') : 'main';
 }
 
-let manifest;
-try {
-  manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-} catch (e) {
-  console.error(`sync: cannot read manifest at ${manifestPath}: ${e.message}`);
-  process.exit(1);
+function readJsonArray(p) {
+  let m;
+  try {
+    m = JSON.parse(readFileSync(p, 'utf8'));
+  } catch (e) {
+    console.error(`sync: cannot read manifest at ${p}: ${e.message}`);
+    process.exit(1);
+  }
+  if (!Array.isArray(m)) {
+    console.error(`sync: manifest at ${p} is not a JSON array`);
+    process.exit(1);
+  }
+  return m;
 }
+
+// ff-pull the `.brot` workspace repo with the same clean-repo discipline as a tenant.
+// Non-fatal throughout: a dirty tree, a missing origin (local-only workspace), or a
+// diverged history just skips the pull and reads the on-disk manifest. Absence of `.brot`
+// itself is handled by the caller (fail soft with a setup hint).
+function pullWorkspace(dir) {
+  const top = git(dir, 'rev-parse', '--show-toplevel');
+  if (!top.ok) {
+    console.log('workspace .brot: not a git repo — reading on-disk manifest');
+    return;
+  }
+  const st = git(dir, 'status', '--porcelain');
+  if (st.ok && st.out !== '') {
+    console.log('workspace .brot: dirty — skipped pull, using on-disk manifest');
+    return;
+  }
+  const f = git(dir, 'fetch', '--prune', 'origin');
+  if (!f.ok) {
+    console.log('workspace .brot: no reachable origin — using on-disk manifest');
+    return;
+  }
+  const def = defaultBranch(dir);
+  const cur = git(dir, 'rev-parse', '--abbrev-ref', 'HEAD');
+  if (cur.ok && cur.out !== def) git(dir, 'checkout', def);
+  const m = git(dir, 'merge', '--ff-only', `origin/${def}`);
+  if (!m.ok) {
+    console.log(`workspace .brot: ff-only skipped (${m.out.split('\n').pop()}) — using on-disk manifest`);
+    return;
+  }
+  console.log('workspace .brot: pulled');
+}
+
+function loadManifest() {
+  // Fixture mode: an explicit manifest override reads that file directly and skips the
+  // `.brot` workspace pull, so bash fixtures stay self-contained.
+  if (overrideManifest) return readJsonArray(manifestPath);
+
+  // Production: the manifest lives in the `.brot` workspace repo. Pull it first, then read.
+  if (!existsSync(brotDir)) {
+    console.error(
+      'sync: no .brot workspace found. Run `npm run setup` to create or attach one, then re-run sync.',
+    );
+    process.exit(1);
+  }
+  pullWorkspace(brotDir);
+  if (!existsSync(manifestPath)) {
+    console.log('workspace .brot: no sync.manifest.json yet — nothing to sync');
+    return [];
+  }
+  return readJsonArray(manifestPath);
+}
+
+const manifest = loadManifest();
 
 const results = []; // { dir, status: synced|cloned|dirty|failed, setup: ran|failed|none, detail }
 let hardFailure = false;
