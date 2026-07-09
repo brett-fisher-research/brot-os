@@ -188,6 +188,7 @@ function cmdInstallBoot(): void {
     home: process.env.BROT_BOOT_HOME ?? homedir(),
     repoRoot: OS_ROOT,
     nodePath: process.execPath,
+    path: process.env.PATH ?? '',
   });
   for (const file of plan.files) {
     mkdirSync(dirname(file.path), { recursive: true });

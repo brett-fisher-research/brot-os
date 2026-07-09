@@ -12,6 +12,9 @@ export interface ShimInputs {
   home: string; // target home dir (overridable for tests)
   repoRoot: string; // absolute brot-os root
   nodePath: string; // absolute node binary
+  path: string; // PATH of the installing shell, baked into the shim so brotd
+  // and its children see the human's PATH, not the init system's minimal one.
+  // Re-running install-boot rewrites the shim, refreshing the baked value.
 }
 
 export interface ShimPlan {
@@ -20,12 +23,18 @@ export interface ShimPlan {
   notes: string[];
 }
 
-function linuxPlan({ home, repoRoot, nodePath }: ShimInputs): ShimPlan {
+// Minimal XML escaping for text embedded in plist <string> values.
+function xmlEscape(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function linuxPlan({ home, repoRoot, nodePath, path }: ShimInputs): ShimPlan {
   const unit = [
     '[Unit]',
     'Description=brotd - brot-os service supervisor',
     '',
     '[Service]',
+    `Environment=PATH=${path}`,
     `ExecStart=${nodePath} --import tsx ${repoRoot}/bin/services/brotd.ts`,
     `WorkingDirectory=${repoRoot}`,
     'Restart=on-failure',
@@ -39,7 +48,10 @@ function linuxPlan({ home, repoRoot, nodePath }: ShimInputs): ShimPlan {
     files: [{ path: `${home}/.config/systemd/user/brotd.service`, content: unit }],
     commands: [
       ['systemctl', '--user', 'daemon-reload'],
-      ['systemctl', '--user', 'enable', '--now', 'brotd.service'],
+      ['systemctl', '--user', 'enable', 'brotd.service'],
+      // restart, not `enable --now`: a reinstall must relaunch a running brotd
+      // so it picks up the freshly baked PATH (restart also starts if stopped)
+      ['systemctl', '--user', 'restart', 'brotd.service'],
     ],
     notes: [
       'run `loginctl enable-linger $USER` once so brotd starts at boot, not just at login',
@@ -47,7 +59,7 @@ function linuxPlan({ home, repoRoot, nodePath }: ShimInputs): ShimPlan {
   };
 }
 
-function darwinPlan({ home, repoRoot, nodePath }: ShimInputs): ShimPlan {
+function darwinPlan({ home, repoRoot, nodePath, path }: ShimInputs): ShimPlan {
   const plistPath = `${home}/Library/LaunchAgents/dev.brot.brotd.plist`;
   const plist = [
     '<?xml version="1.0" encoding="UTF-8"?>',
@@ -63,6 +75,10 @@ function darwinPlan({ home, repoRoot, nodePath }: ShimInputs): ShimPlan {
     `    <string>${repoRoot}/bin/services/brotd.ts</string>`,
     '  </array>',
     `  <key>WorkingDirectory</key><string>${repoRoot}</string>`,
+    '  <key>EnvironmentVariables</key>',
+    '  <dict>',
+    `    <key>PATH</key><string>${xmlEscape(path)}</string>`,
+    '  </dict>',
     '  <key>RunAtLoad</key><true/>',
     `  <key>StandardOutPath</key><string>${repoRoot}/.logs/services/brotd-boot.log</string>`,
     `  <key>StandardErrorPath</key><string>${repoRoot}/.logs/services/brotd-boot.log</string>`,
@@ -73,14 +89,19 @@ function darwinPlan({ home, repoRoot, nodePath }: ShimInputs): ShimPlan {
   return {
     files: [{ path: plistPath, content: plist }],
     commands: [['launchctl', 'load', '-w', plistPath]],
-    notes: [],
+    notes: [
+      'reinstalling over a loaded agent: run `launchctl unload` then `launchctl load -w` (or log out/in) so launchd picks up the refreshed PATH',
+    ],
   };
 }
 
-function win32Plan({ home, repoRoot, nodePath }: ShimInputs): ShimPlan {
+function win32Plan({ home, repoRoot, nodePath, path }: ShimInputs): ShimPlan {
+  // Scheduled tasks can't carry env vars declaratively; the launcher cmd sets
+  // PATH before exec instead, so a reinstall refreshing the file refreshes PATH.
   const cmdPath = `${home}\\AppData\\Local\\brot\\brotd.cmd`;
   const cmd = [
     '@echo off',
+    `set "PATH=${path}"`,
     `cd /d "${repoRoot}"`,
     `"${nodePath}" --import tsx "${repoRoot}\\bin\\services\\brotd.ts"`,
     '',

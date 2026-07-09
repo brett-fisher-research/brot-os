@@ -183,7 +183,9 @@ exponential backoff (cap 30s), and answers a local control socket. Kernel pieces
   `.log.1` past ~5MB); `logs` reads the file directly, so it works with brotd down.
 - Boot - `install-boot` writes the idempotent per-OS login shim whose only job is launching
   brotd: systemd user unit on Linux (plus a `loginctl enable-linger` note), launchd plist on
-  macOS, ONLOGON Scheduled Task on Windows.
+  macOS, ONLOGON Scheduled Task on Windows. The shim bakes in the installing shell's PATH so
+  brotd and its children see the human's PATH, not the init system's minimal one; re-running
+  `install-boot` refreshes it.
 
 ## Prose style: razor
 
