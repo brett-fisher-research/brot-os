@@ -4,9 +4,6 @@ node_modules/
 *.log
 HIVE.md
 
-# experiments/ is its own tenant repo (the dir IS the repo) — ignore wholesale
-/experiments/
-
 # the workspace layer: plans, initiatives, and the tenant sync manifest live in the
 # .brot repo (gitignored by brot-os, its own backed-up repo). Never tracked here.
 .brot/

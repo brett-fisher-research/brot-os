@@ -87,7 +87,7 @@ when a fix looks one-line trivial: skills load transiently, this rule does not.
 ## Tenant CLAUDE.md first
 
 When the user says to work on a project ("let's work on duree"), locate the tenant
-(`projects/<name>/`, `services/<name>/`, `dotfiles/`, `experiments/`) and read its own
+(`projects/<name>/`, `services/<name>/`, `dotfiles/`) and read its own
 `CLAUDE.md` BEFORE any exploration or dispatch — it carries that repo's Claude Code
 instructions (conventions, test verbs, branch rules) and saves exploration tokens. Point
 dispatched subagents at it too.
@@ -161,7 +161,6 @@ bodies, PR descriptions.
 | shared libs | `packages/` |
 | daemons | `services/` |
 | installed programs | `projects/` |
-| `/tmp`, scratch | `experiments/` |
 | `/home`, `/srv` | your tenant repos (your content) |
 
 ## What this repo tracks vs. doesn't
@@ -193,8 +192,6 @@ bin/              the kernel: sync + setup core (bin/sync.mjs, bin/setup.ts); no
 config/           secrets + env (GITIGNORED) + *.example templates
 packages/<name>/  shared modules (notify is tracked & generic; others are tenant repos)
 services/<name>/  long-running daemons that own data behind an API — each its own repo
-experiments/      its OWN separate repo (a tenant, NOT brot-os) holding many self-contained
-                  Next.js experiments — git work lands in that repo, never brot-os (scratch/iterate)
 projects/<name>/  promoted, productionized projects — each its own repo
 dotfiles/<tool>-conf/  tool-config repos (nvim-conf, wezterm-conf, tmux-conf) — each its own repo,
                   each with an idempotent `npm run setup`

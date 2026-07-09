@@ -46,7 +46,7 @@ Think Unix. Each top-level dir maps to a role:
   idempotent `npm run setup`.
 - `.brot/` — plan archive (gitignored, never deleted): timestamped plan files agents tick as work lands.
 
-Tenants (`experiments/`, `services/`, `projects/`, `dotfiles/`, most of `packages/`) are their own git repos inside
+Tenants (`services/`, `projects/`, `dotfiles/`, most of `packages/`) are their own git repos inside
 container dirs and are gitignored by brot-os. brot-os is the OS; the projects are userland.
 
 ## Quickstart
