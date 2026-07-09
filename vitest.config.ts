@@ -9,6 +9,9 @@ export default defineConfig({
     // Bash suites (folded in via tests/bash.test.ts) do real git clones per case;
     // give every test a generous ceiling so they never trip the 5s default.
     testTimeout: 120000,
+    // The bash cases are it.concurrent and share no state (isolated mktemp fixtures);
+    // lift the cap well above the file count so every one runs at once.
+    maxConcurrency: 32,
     exclude: [
       '**/node_modules/**',
       'projects/**',
