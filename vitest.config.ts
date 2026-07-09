@@ -6,6 +6,9 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     include: ['tests/**/*.test.ts'],
+    // Bash suites (folded in via tests/bash.test.ts) do real git clones per case;
+    // give every test a generous ceiling so they never trip the 5s default.
+    testTimeout: 120000,
     exclude: [
       '**/node_modules/**',
       'projects/**',

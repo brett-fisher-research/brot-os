@@ -17,7 +17,7 @@ What the framework believes, in one line each (the why lives in `CLAUDE.md`):
 1. Skills are the interface; deterministic mechanics live in scripts skills call (`npm run test/dev/setup/sync`).
 2. The main thread is a PM that never writes code — subagents do all the work.
 3. Every subagent gets a goal contract: one goal, deterministic verification criteria.
-4. Tests live in `tests/`; bash assertion suites are first-class alongside vite.
+4. Tests pin BEHAVIOR and read as documentation; no tombstones, no prose-greps; one `npm test` (vitest) covers bash + TS.
 5. Every repo carries a `package.json` with standard verbs: `test`, `dev`, `setup`.
 6. All code changes ride a PR (`/pr` → human review → `/merge`). Nothing lands directly.
 7. Mechanism vs config: tracked code is generic; anything host/account/secret-specific lives in gitignored `config/`.
@@ -71,11 +71,21 @@ container dirs and are gitignored by brot-os. brot-os is the OS; the projects ar
 
 ## Tests
 
-Bash assertion suites live in `tests/`. Canonical command:
+Tests live in `tests/`. One command runs everything:
 
 ```sh
-bash tests/run.sh
+npm test
 ```
 
-It execs every `tests/*.test.sh` and exits non-zero if any is red. `npm test` from the repo
-root runs the same thing.
+It is a single `vitest run` covering both the TypeScript suites and the bash assertion suites
+(`tests/bash.test.ts` globs every `tests/*.test.sh` and runs each as one case). Exits non-zero if
+any is red.
+
+What a test in here is for:
+
+- Pin BEHAVIOR: given an input, assert the output or effect. A good test reads as documentation -
+  "what does this code do?".
+- Named living invariants are allowed (and only these): portability (a clone runs anywhere),
+  privacy (a personal manifest never ships in framework brot-os).
+- Not allowed: tombstone tests (asserting a removed/renamed thing stays gone) or prose-greps
+  (asserting a doc or skill file contains some phrase).

@@ -3,8 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "bash tests/run.sh",
-    "test:unit": "vitest run",
+    "test": "vitest run",
     "setup": "tsx bin/setup.ts",
     "sync": "node bin/sync.mjs"
   },

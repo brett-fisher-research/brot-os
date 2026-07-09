@@ -19,8 +19,10 @@ The framework is opinionated. Each opinion, and why it holds:
    conversation stays free for steering.
 3. Every subagent gets a goal contract: one goal, deterministic verification criteria — agents
    own outcomes, not step lists.
-4. Tests live in `tests/`; bash assertion suites are first-class alongside vite — every claim of
-   done is checkable.
+4. Tests pin BEHAVIOR and read as documentation (given input, assert output/effect) - no
+   tombstone tests (asserting a removed thing stays gone), no prose-greps (asserting a doc/skill
+   contains a phrase); named living invariants (portability, privacy) are the only allowed
+   non-behavioral tests. One `npm test` (vitest) runs the bash suites + TS together.
 5. Every repo carries a `package.json` with standard verbs: `test`, `dev`, `setup` — the same
    muscle memory works in every tenant.
 6. All code changes ride a PR (`/brot-pr` → human review → `/brot-merge`); nothing lands directly — the
