@@ -7,6 +7,7 @@
 //   logs <name> [-n N]         last N log lines (default 200), works daemon-down
 //   start|stop|restart <name>  via the control socket; auto-starts brotd if down
 //   enable|disable <name>      edit .brot/services.local.json enabled list
+//   shutdown                   stop all children cleanly, then brotd exits
 //   install-boot               idempotent per-OS login shim that launches brotd
 //
 // Exits non-zero on unknown services, unknown verbs, and failed actions.
@@ -148,6 +149,15 @@ async function cmdControl(root: string, cmd: 'start' | 'stop' | 'restart', name?
   console.log(`${name}: ${cmd} ok`);
 }
 
+// Ask a running brotd to stop all children and exit. No daemon -> non-zero;
+// never starts one just to kill it.
+async function cmdShutdown(root: string): Promise<void> {
+  if ((await daemonStatus(root)) === null) fail('brotd is not running');
+  const res = await request(socketPath(root), { cmd: 'shutdown' }, 15_000);
+  if (!res.ok) fail(res.error);
+  console.log('brotd: shutdown ok (all services stopping, daemon exiting)');
+}
+
 interface LocalConfig {
   enabled: string[];
   [key: string]: unknown;
@@ -215,6 +225,10 @@ async function interactive(root: string): Promise<void> {
     const picked = await select({ message: 'services', choices: serviceChoices(snap), pageSize: 20 });
     if (picked === 'quit') return;
     if (picked === 'refresh') continue;
+    if (picked === 'shutdown-daemon') {
+      await cmdShutdown(root);
+      return;
+    }
     const svc = snap.services.find((s) => s.name === picked);
     if (!svc) continue;
     const action = await select({ message: svc.name, choices: actionChoices(svc) });
@@ -248,11 +262,14 @@ async function main(): Promise<void> {
       if (!args[0]) fail('usage: services disable <name>');
       setEnabled(root, args[0], false);
       break;
+    case 'shutdown':
+      await cmdShutdown(root);
+      break;
     case 'install-boot':
       cmdInstallBoot();
       break;
     default:
-      fail(`unknown verb "${verb}" (status|logs|start|stop|restart|enable|disable|install-boot)`);
+      fail(`unknown verb "${verb}" (status|logs|start|stop|restart|enable|disable|shutdown|install-boot)`);
   }
 }
 

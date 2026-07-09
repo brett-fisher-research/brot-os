@@ -32,11 +32,22 @@ describe('menu core', () => {
       ],
     };
     const choices = serviceChoices(snap);
-    expect(choices.map((c) => c.value)).toEqual(['bookshelf', 'quiet', 'refresh', 'quit']);
+    expect(choices.map((c) => c.value)).toEqual([
+      'bookshelf',
+      'quiet',
+      'refresh',
+      'shutdown-daemon',
+      'quit',
+    ]);
     expect(choices[0].name).toContain('running');
     expect(choices[0].name).toContain('4242');
     expect(choices[0].name).toContain(':3010');
     expect(choices[1].name).toContain('stopped');
+  });
+
+  it('offers daemon shutdown only when brotd is up', () => {
+    const snap = { daemonUp: false, services: [entry({ name: 'quiet' })] };
+    expect(serviceChoices(snap).map((c) => c.value)).toEqual(['quiet', 'refresh', 'quit']);
   });
 
   it('offers stop/restart for running services and start for stopped ones', () => {

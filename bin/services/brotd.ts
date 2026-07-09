@@ -27,7 +27,7 @@ import {
   unlinkSync,
 } from 'node:fs';
 import { type Server, type Socket, createServer } from 'node:net';
-import { dirname, join, resolve } from 'node:path';
+import { delimiter, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -120,7 +120,24 @@ export function buildEnv(
     Object.assign(env, parseEnvFile(readFileSync(path, 'utf8')));
   }
   Object.assign(env, ks.def.env);
+  prependNodeDir(env);
   return env;
+}
+
+// Children must find the node that runs brotd. Under a minimal boot
+// environment (systemd's PATH) the daemon's node dir (e.g. an nvm dir) is
+// absent, so `node ...` cmds die with "node: not found". Prepend
+// dirname(process.execPath) to whatever PATH the env/envFiles/def produced:
+// their entries still win in order, the node dir just leads the list (deduped
+// if already present). Win32 env keys are case-insensitive, so reuse the
+// existing PATH-ish key.
+export function prependNodeDir(
+  env: NodeJS.ProcessEnv,
+  nodeDir: string = dirname(process.execPath),
+): void {
+  const key = Object.keys(env).find((k) => k.toUpperCase() === 'PATH') ?? 'PATH';
+  const parts = (env[key] ?? '').split(delimiter).filter((p) => p !== '' && p !== nodeDir);
+  env[key] = [nodeDir, ...parts].join(delimiter);
 }
 
 class Supervisor {
