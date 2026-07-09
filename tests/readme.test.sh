@@ -21,8 +21,8 @@ for d in bin config projects packages services systemd templates; do
 done
 
 check "has ## Quickstart section" 'grep -q "^## Quickstart" README.md'
-check "Quickstart mentions bootstrap" 'grep -q "bootstrap" README.md'
-check "Quickstart mentions BROT_OS_ROOT" 'grep -q "BROT_OS_ROOT" README.md'
+check "Quickstart mentions npm run setup" 'grep -q "npm run setup" README.md'
+check "Quickstart mentions npm run sync" 'grep -q "npm run sync" README.md'
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

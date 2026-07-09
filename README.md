@@ -37,7 +37,7 @@ The main thread stays PM throughout — it never writes code.
 
 Think Unix. Each top-level dir maps to a role:
 
-- `bin/` — the kernel: shell scripts that render Caddy, install systemd units, publish, notify.
+- `bin/` — the sync + setup core: `sync.mjs` (tenant sync) and `setup.ts` (workspace bootstrap).
 - `config/` — the `/etc` of brot-os: secrets + env (GITIGNORED). Ships only `*.example` templates.
 - `systemd/` — long-running service units + `@@…@@` templates the kernel fills in at setup.
 - `templates/` — scaffolding materials stamped into new projects (PWA files, notify, icons).
@@ -60,19 +60,16 @@ container dirs and are gitignored by brot-os. brot-os is the OS; the projects ar
 2. Supply config (the `/etc` layer). Copy each example and fill in real values:
    ```sh
    cp config/notify.env.example config/notify.env
-   cp config/cloudflare.env.example config/cloudflare.env
    ```
-3. Bootstrap the host (idempotent — installs services, renders Caddy, points Tailscale at it):
+3. Bootstrap the workspace (idempotent):
    ```sh
-   bin/bootstrap.sh
+   npm run setup
    ```
-
-The kernel self-locates its repo root, so it runs from whatever path you cloned into. To pin the
-root explicitly (e.g. for a service or a non-standard checkout), set `BROT_OS_ROOT`:
-
-```sh
-BROT_OS_ROOT=/opt/brot-os bin/bootstrap.sh
-```
+4. Sync every tenant repo listed in the manifest (clone missing, ff-pull clean, run each
+   tenant's setup):
+   ```sh
+   npm run sync
+   ```
 
 ## Tests
 

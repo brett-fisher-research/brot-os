@@ -154,7 +154,7 @@ bodies, PR descriptions.
 | Unix | brot-os |
 |------|-----------|
 | `/bin`, coreutils | `.claude/skills/` — the commands you drive everything with |
-| kernel + init | `bin/` + `systemd/` — Caddy/systemd/tailscale/cloudflare render + publish |
+| kernel + init | `bin/` + `systemd/` — sync + setup core (`sync.mjs`, `setup.ts`) plus systemd service units; notify lives in `packages/notify` |
 | `/etc` (config) | `config/` — secrets + env, gitignored, never tracked |
 | man pages / FHS | this root `CLAUDE.md` — the single blueprint (see Layout) |
 | shared libs | `packages/` |
@@ -188,7 +188,8 @@ tool genuinely needs them — document the exception in that project's own `CLAU
 
 ```
 .claude/skills/   the commands — git-tracked in-repo, native to brot-os
-bin/ systemd/ templates/   the kernel: routing, services, publishing, notify, console-check
+bin/ systemd/ templates/   the kernel: sync + setup core (bin/sync.mjs, bin/setup.ts),
+                  systemd service units, project templates; notify lives in packages/notify
 config/           secrets + env (GITIGNORED) + *.example templates
 packages/<name>/  shared modules (notify is tracked & generic; others are tenant repos)
 services/<name>/  long-running daemons that own data behind an API — each its own repo
