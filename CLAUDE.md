@@ -138,6 +138,36 @@ not the manifest's directory. If `.brot` is absent, sync fails soft and points a
 `/brot-sync` wraps it with verification and gap-handling. Cross-machine flow: clone brot-os, run
 `npm run setup` (first time) then `/brot-sync` (or `npm run sync`), done.
 
+## Long-running services
+
+Services declare HOW to run via a generic `brot.service.json` at their repo root; WHETHER they
+run on a host is per-host config in `.brot/services.local.json`. brotd (the supervisor, a
+follow-up PR) consumes both. Kernel pieces: `bin/services/def.ts` (parse + validate),
+`bin/services/discover.ts` (discovery + enablement).
+
+- Schema per def - generic keys only, nothing proxy/tunnel/init-system-specific:
+
+```json
+{ "name": "bookshelf", "cmd": "node server.js", "cwd": ".",
+  "env": { "NODE_ENV": "production" }, "envFile": "~/brot-os/config/bookshelf.env",
+  "port": 3010 }
+```
+
+  - `name` + `cmd` required; `cwd` repo-root-relative; `envFile` a string or array
+    (normalized to an array); `port` display metadata only.
+  - A file holds ONE def object or an array of defs (multi-app repos).
+  - Unknown keys and missing `name`/`cmd` reject with named errors.
+  - `~` at the start of a `cmd` path argument or an `envFile` path expands to the home dir.
+- Discovery - scan the tenant containers (`projects/`, `services/`, `dotfiles/`, `packages/`)
+  directly under ROOT for repo-root `brot.service.json` files.
+- Enablement - `.brot/services.local.json` (gitignored, per-host):
+  `{ "enabled": ["bookshelf"], "defs": [...] }`. A service runs iff its name is in `enabled`.
+  Inline `defs` are the escape hatch for host-local one-offs with no repo (source `local`).
+  Missing file: nothing enabled, no crash.
+- CLI verbs (planned, land with brotd): `npm run services` interactive for the human;
+  `npm run services -- status|logs <name> [-n N]|start|stop|restart|enable|disable <name>`
+  plain text for AI use.
+
 ## Prose style: razor
 
 All prose is razor style. No exceptions. Applies to chat replies, docs, READMEs, plans, commit
