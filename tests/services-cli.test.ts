@@ -124,6 +124,31 @@ describe('services CLI', () => {
     expect((await cli(root, ['frobnicate'])).code).not.toBe(0);
   });
 
+  // Fixture roots never match the OS root, so daemon-start takes the detached
+  // fallback here even on a host with a real boot shim installed.
+  it('daemon-start brings brotd up detached in a fresh root; status then reports it', async () => {
+    const fresh = mkdtempSync(join(tmpdir(), 'brot-cli-ds-'));
+    try {
+      write(fresh, 'services/svc/brot.service.json', JSON.stringify({ name: 'svc', cmd: 'node -e 0' }));
+
+      const started = await cli(fresh, ['daemon-start']);
+      expect(started.code).toBe(0);
+      expect(started.stdout).toContain('brotd: started (via detached)');
+
+      const status = await cli(fresh, ['status']);
+      expect(status.code).toBe(0);
+      expect(status.stdout).toMatch(/brotd: running \(pid \d+, via detached\)/);
+
+      const again = await cli(fresh, ['daemon-start']);
+      expect(again.code).toBe(0);
+      expect(again.stdout).toContain('brotd: already running');
+    } finally {
+      await cli(fresh, ['shutdown']);
+      await new Promise((r) => setTimeout(r, 300));
+      rmSync(fresh, { recursive: true, force: true });
+    }
+  });
+
   it('enable/disable edit the local enabled list, creating the file if missing', async () => {
     const fresh = mkdtempSync(join(tmpdir(), 'brot-cli-en-'));
     try {

@@ -6,11 +6,13 @@
 //   status                     table: name, enabled, state, pid, port, restarts
 //   logs <name> [-n N]         last N log lines (default 200), works daemon-down
 //   start|stop|restart <name>  via the control socket; auto-starts brotd if down
+//   daemon-start               bring brotd up (through the boot shim when installed)
 //   enable|disable <name>      edit .brot/services.local.json enabled list
 //   shutdown                   stop all children cleanly, then brotd exits
 //   install-boot               idempotent per-OS login shim that launches brotd
 //
 // Exits non-zero on unknown services, unknown verbs, and failed actions.
+// Verb output is plain uncolored text; only the interactive menu uses ANSI.
 
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -20,14 +22,23 @@ import { fileURLToPath } from 'node:url';
 
 import {
   type ControlRequest,
+  type DaemonInfo,
   type StatusEntry,
   logFile,
   request,
   socketPath,
 } from './control.js';
 import { LOCAL_FILE, discoverServices } from './discover.js';
-import { type Dispatch, type Snapshot, actionChoices, dispatch, serviceChoices } from './menu.js';
-import { bootShimPlan } from './shim.js';
+import {
+  type Dispatch,
+  type Snapshot,
+  actionChoices,
+  colorEnabled,
+  dispatch,
+  headerLine,
+  serviceChoices,
+} from './menu.js';
+import { bootShimPlan, daemonStartPlan, shimMarkerPath } from './shim.js';
 
 const OS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -40,10 +51,13 @@ function fail(msg: string): never {
   process.exit(1);
 }
 
-async function daemonStatus(root: string, timeoutMs = 1500): Promise<StatusEntry[] | null> {
+async function daemonStatus(
+  root: string,
+  timeoutMs = 1500,
+): Promise<{ services: StatusEntry[]; daemon?: DaemonInfo } | null> {
   try {
     const res = await request(socketPath(root), { cmd: 'status' }, timeoutMs);
-    if (res.ok && res.services) return res.services;
+    if (res.ok && res.services) return { services: res.services, daemon: res.daemon };
     return null;
   } catch {
     return null;
@@ -69,27 +83,57 @@ function offlineStatus(root: string): StatusEntry[] {
 
 async function snapshot(root: string): Promise<Snapshot> {
   const live = await daemonStatus(root);
-  if (live) return { daemonUp: true, services: live };
+  if (live) return { daemonUp: true, daemon: live.daemon, services: live.services };
   return { daemonUp: false, services: offlineStatus(root) };
 }
 
-// Launch brotd detached (survives this CLI) and wait for its socket.
-async function ensureDaemon(root: string): Promise<void> {
-  if (await daemonStatus(root, 500)) return;
-  const brotd = join(OS_ROOT, 'bin', 'services', 'brotd.ts');
-  const child = spawn(process.execPath, ['--import', 'tsx', brotd], {
-    cwd: OS_ROOT, // tsx resolves from brot-os's node_modules
-    env: { ...process.env, BROT_SERVICES_ROOT: root },
-    detached: true,
-    stdio: 'ignore',
-  });
-  child.unref();
+async function awaitSocket(root: string, failMsg: string): Promise<void> {
   const deadline = Date.now() + 10_000;
   while (Date.now() < deadline) {
     if (await daemonStatus(root, 500)) return;
     await new Promise((r) => setTimeout(r, 150));
   }
-  fail('brotd did not come up within 10s');
+  fail(failMsg);
+}
+
+// Bring brotd up and wait for its socket. Routing (daemonStartPlan): a boot
+// shim installed for this platform starts brotd THROUGH the init system so it
+// owns the process; otherwise fall back to a detached spawn that survives this
+// CLI. The shim always serves the real OS root, so fixture roots
+// (BROT_SERVICES_ROOT) always take the detached path.
+async function startDaemon(root: string): Promise<'already-running' | 'shim' | 'detached'> {
+  if (await daemonStatus(root, 500)) return 'already-running';
+  const platform = process.platform;
+  const shimUsable =
+    root === OS_ROOT &&
+    (platform === 'linux' || platform === 'darwin' || platform === 'win32') &&
+    existsSync(shimMarkerPath(platform, homedir()));
+  const plan =
+    platform === 'linux' || platform === 'darwin' || platform === 'win32'
+      ? daemonStartPlan(platform, homedir(), shimUsable)
+      : ({ kind: 'detached' } as const);
+  if (plan.kind === 'init') {
+    const res = spawnSync(plan.argv[0], plan.argv.slice(1), { stdio: 'inherit' });
+    if (res.status !== 0) fail(`daemon start via shim failed: ${plan.argv.join(' ')}`);
+    await awaitSocket(root, 'brotd did not come up within 10s (shim start)');
+    return 'shim';
+  }
+  const brotd = join(OS_ROOT, 'bin', 'services', 'brotd.ts');
+  const child = spawn(process.execPath, ['--import', 'tsx', brotd], {
+    cwd: OS_ROOT, // tsx resolves from brot-os's node_modules
+    env: { ...process.env, BROT_SERVICES_ROOT: root, BROTD_VIA: 'detached' },
+    detached: true,
+    stdio: 'ignore',
+  });
+  child.unref();
+  await awaitSocket(root, 'brotd did not come up within 10s');
+  return 'detached';
+}
+
+async function cmdDaemonStart(root: string): Promise<void> {
+  const how = await startDaemon(root);
+  if (how === 'already-running') console.log('brotd: already running');
+  else console.log(`brotd: started (via ${how})`);
 }
 
 function requireKnown(root: string, name: string): void {
@@ -103,8 +147,10 @@ function pad(s: string, w: number): string {
   return s.length >= w ? s : s + ' '.repeat(w - s.length);
 }
 
+// Plain uncolored text: verb output is the AI/grep face.
 function printStatus(snap: Snapshot): void {
   if (!snap.daemonUp) console.log('brotd: not running (states below assume stopped)');
+  else console.log(`brotd: running (pid ${snap.daemon?.pid ?? '?'}, via ${snap.daemon?.via ?? 'detached'})`);
   const header = ['NAME', 'ENABLED', 'STATE', 'PID', 'PORT', 'RESTARTS'];
   const rows = snap.services.map((s) => [
     s.name,
@@ -143,7 +189,7 @@ function cmdLogs(root: string, args: string[]): void {
 async function cmdControl(root: string, cmd: 'start' | 'stop' | 'restart', name?: string): Promise<void> {
   if (!name) fail(`usage: services ${cmd} <name>`);
   requireKnown(root, name);
-  await ensureDaemon(root);
+  await startDaemon(root);
   const res = await request(socketPath(root), { cmd, name } as ControlRequest, 15_000);
   if (!res.ok) fail(res.error);
   console.log(`${name}: ${cmd} ok`);
@@ -216,23 +262,28 @@ async function runDispatch(root: string, d: Dispatch): Promise<void> {
 
 async function interactive(root: string): Promise<void> {
   const { select } = await import('@inquirer/prompts');
+  const color = colorEnabled(Boolean(process.stdout.isTTY), process.env);
   for (;;) {
     const snap = await snapshot(root);
-    if (!snap.daemonUp) console.log('brotd: not running (actions will auto-start it)');
-    if (snap.services.length === 0) {
-      console.log('no services discovered');
-      return;
-    }
-    const picked = await select({ message: 'services', choices: serviceChoices(snap), pageSize: 20 });
+    console.log(headerLine(snap, color));
+    const picked = await select({
+      message: 'services',
+      choices: serviceChoices(snap, color),
+      pageSize: 20,
+    });
     if (picked === 'quit') return;
     if (picked === 'refresh') continue;
+    if (picked === 'start-daemon') {
+      await cmdDaemonStart(root);
+      continue;
+    }
     if (picked === 'shutdown-daemon') {
       await cmdShutdown(root);
       return;
     }
     const svc = snap.services.find((s) => s.name === picked);
     if (!svc) continue;
-    const action = await select({ message: svc.name, choices: actionChoices(svc) });
+    const action = await select({ message: svc.name, choices: actionChoices(svc, snap.daemonUp) });
     await runDispatch(root, dispatch(action, svc.name));
   }
 }
@@ -255,6 +306,9 @@ async function main(): Promise<void> {
     case 'restart':
       await cmdControl(root, verb, args[0]);
       break;
+    case 'daemon-start':
+      await cmdDaemonStart(root);
+      break;
     case 'enable':
       if (!args[0]) fail('usage: services enable <name>');
       setEnabled(root, args[0], true);
@@ -270,7 +324,9 @@ async function main(): Promise<void> {
       cmdInstallBoot();
       break;
     default:
-      fail(`unknown verb "${verb}" (status|logs|start|stop|restart|enable|disable|shutdown|install-boot)`);
+      fail(
+        `unknown verb "${verb}" (status|logs|start|stop|restart|daemon-start|enable|disable|shutdown|install-boot)`,
+      );
   }
 }
 

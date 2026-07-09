@@ -283,8 +283,17 @@ class Supervisor {
     }));
   }
 
+  // Shim launches set BROTD_VIA=shim; systemd's INVOCATION_ID covers units
+  // installed before that env var existed.
+  private daemonInfo(): { pid: number; via: 'shim' | 'detached' } {
+    const viaShim = process.env.BROTD_VIA === 'shim' || Boolean(process.env.INVOCATION_ID);
+    return { pid: process.pid, via: viaShim ? 'shim' : 'detached' };
+  }
+
   private async handle(msg: ControlRequest): Promise<ControlResponse> {
-    if (msg.cmd === 'status') return { ok: true, services: this.status() };
+    if (msg.cmd === 'status') {
+      return { ok: true, services: this.status(), daemon: this.daemonInfo() };
+    }
     if (msg.cmd === 'shutdown') {
       setImmediate(() => void this.shutdown());
       return { ok: true };
