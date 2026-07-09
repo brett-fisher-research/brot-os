@@ -1,3 +1,5 @@
+![brot-os](./brot_cover_image.png)
+
 # brot-os
 
 A virtual AI OS: one macro repo hosting many gitignored tenant repos, driven almost entirely
