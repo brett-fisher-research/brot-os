@@ -1,8 +1,9 @@
 # brot-os
 
 A virtual AI OS: one macro repo hosting many gitignored tenant repos, driven almost entirely
-through Claude Code skills. Skills are the commands, the kernel (`bin/` + `systemd/`) is the
-hosting machinery, projects live as self-contained repos in well-known directories. brot-os is
+through Claude Code skills. Skills are the commands, the kernel (`bin/` sync + setup core plus
+the skills) is the hosting machinery, projects live as self-contained repos in well-known
+directories. brot-os is
 the OS; your projects are userland.
 
 > Status — custom-first. Built for the user's setup now; skill/kernel wording may be
@@ -113,7 +114,7 @@ These are some of the following terms I will use in our chats:
 
 brot-os splits into two layers, each its own git repo:
 
-- Framework layer — tracked brot-os: skills, kernel (`bin/`, `systemd/`, `templates/`), this
+- Framework layer — tracked brot-os: skills, kernel (`bin/`), this
   root `CLAUDE.md`, generic packages, `config/*.example`. Shareable, host-agnostic.
 - Workspace layer — `.brot/`: the user's personal machine state. Gitignored by brot-os but its
   OWN backed-up repo. Holds `sync.manifest.json` (the tenant registry), `plans/`, `initiatives/`.
@@ -154,7 +155,7 @@ bodies, PR descriptions.
 | Unix | brot-os |
 |------|-----------|
 | `/bin`, coreutils | `.claude/skills/` — the commands you drive everything with |
-| kernel + init | `bin/` + `systemd/` — sync + setup core (`sync.mjs`, `setup.ts`) plus systemd service units; notify lives in `packages/notify` |
+| kernel + init | `bin/` — the sync + setup core (`sync.mjs`, `setup.ts`); notify lives in `packages/notify` |
 | `/etc` (config) | `config/` — secrets + env, gitignored, never tracked |
 | man pages / FHS | this root `CLAUDE.md` — the single blueprint (see Layout) |
 | shared libs | `packages/` |
@@ -165,7 +166,7 @@ bodies, PR descriptions.
 
 ## What this repo tracks vs. doesn't
 
-brot-os tracks only the OS layer: skills, the kernel (`bin/`, `systemd/`, `templates/`), this
+brot-os tracks only the OS layer: skills, the kernel (`bin/`), this
 root `CLAUDE.md`, the generic `packages/notify`, and `config/*.example` templates.
 
 Everything else is a tenant — its own git repo inside a container dir, gitignored by brot-os
@@ -188,8 +189,7 @@ tool genuinely needs them — document the exception in that project's own `CLAU
 
 ```
 .claude/skills/   the commands — git-tracked in-repo, native to brot-os
-bin/ systemd/ templates/   the kernel: sync + setup core (bin/sync.mjs, bin/setup.ts),
-                  systemd service units, project templates; notify lives in packages/notify
+bin/              the kernel: sync + setup core (bin/sync.mjs, bin/setup.ts); notify lives in packages/notify
 config/           secrets + env (GITIGNORED) + *.example templates
 packages/<name>/  shared modules (notify is tracked & generic; others are tenant repos)
 services/<name>/  long-running daemons that own data behind an API — each its own repo

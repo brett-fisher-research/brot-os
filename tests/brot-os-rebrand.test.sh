@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Asserts the string-level rebrand to brot-os: package scope, env var, and that the
-# kernel/systemd/template/test surface carries no old-name strings.
+# kernel/test surface carries no old-name strings.
 set -u
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -23,7 +23,7 @@ check "no old package scope under packages/notify" \
   '[ "$(grep -rl "$SCOPE_OLD" packages/notify | wc -l)" -eq 0 ]'
 
 # Non-doc string surface is clean (case-insensitive).
-for d in systemd templates bin tests; do
+for d in bin tests; do
   check "no old name under $d/" \
     "[ \"\$(grep -rIil \"\$OLD\" $d | wc -l)\" -eq 0 ]"
 done

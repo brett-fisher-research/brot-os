@@ -39,8 +39,6 @@ Think Unix. Each top-level dir maps to a role:
 
 - `bin/` — the sync + setup core: `sync.mjs` (tenant sync) and `setup.ts` (workspace bootstrap).
 - `config/` — the `/etc` of brot-os: secrets + env (GITIGNORED). Ships only `*.example` templates.
-- `systemd/` — long-running service units + `@@…@@` templates the kernel fills in at setup.
-- `templates/` — scaffolding materials stamped into new projects (PWA files, notify, icons).
 - `packages/` — shared, generic modules (e.g. `@brot-os/notify`). Reusable across projects.
 - `services/` — long-running daemons that own data behind an API — each its own repo.
 - `projects/` — promoted, productionized projects — each its own repo.
