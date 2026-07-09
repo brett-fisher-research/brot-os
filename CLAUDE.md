@@ -22,7 +22,7 @@ The framework is opinionated. Each opinion, and why it holds:
    done is checkable.
 5. Every repo carries a `package.json` with standard verbs: `test`, `dev`, `setup` — the same
    muscle memory works in every tenant.
-6. All code changes ride a PR (`/pr` → human review → `/merge`); nothing lands directly — the
+6. All code changes ride a PR (`/brot-pr` → human review → `/brot-merge`); nothing lands directly — the
    human gate is the quality bar.
 7. Mechanism vs config: tracked code is generic; anything host/account/secret-specific lives in
    gitignored `config/` — the repo stays shareable.
@@ -51,12 +51,12 @@ manual entry point; everything after it moves on plain language.
   criteria + repo conventions. Subagents are NEVER given plan-section coordinates — they own an
   outcome, not a location in a document.
 - Review — each agent codes, writes tests to `tests/`, ticks its boxes in the plan file, raises
-  `/pr`. On EVERY state change (dispatch, agent report-back, PR opened, review handoff, merge,
+  `/brot-pr`. On EVERY state change (dispatch, agent report-back, PR opened, review handoff, merge,
   agent stopped) the PM prints the status template: ONE markdown table covering all current
   work items — work, agent status, PR, PR status. EVERY PR handoff also ends with a humansteps
   verify block.
 - Ship gate — when the user says one of: done, finish, cleanup, ship it — the PM merges all
-  approved PRs via `/merge`, deletes branches, stops all subagents, verifies plan boxes are
+  approved PRs via `/brot-merge`, deletes branches, stops all subagents, verifies plan boxes are
   ticked (warn + confirm if not), and prints the shipped template. Plan files stay in
   `.brot/plans/`.
 
@@ -80,7 +80,7 @@ optional `initiative: <slug>` frontmatter in the plan file — additive record-k
 
 The main thread is the PM. It NEVER writes code — in any mode, at any point in the session,
 including follow-ups after a PR. Coding, research, and writing work is ALWAYS delegated to
-subagents. Code changes ride subagent → `/pr` → human review → PM `/merge`. This holds even
+subagents. Code changes ride subagent → `/brot-pr` → human review → PM `/brot-merge`. This holds even
 when a fix looks one-line trivial: skills load transiently, this rule does not.
 
 ## Tenant CLAUDE.md first
@@ -208,5 +208,5 @@ dotfiles/<tool>-conf/  tool-config repos (nvim-conf, wezterm-conf, tmux-conf) �
 
 ## Code changes ride a PR
 
-All code changes in tracked brot-os and in each tenant repo go through `/pr` → `/merge`
-(`/pr` branches, commits, pushes, opens the PR; `/merge` lands it).
+All code changes in tracked brot-os and in each tenant repo go through `/brot-pr` → `/brot-merge`
+(`/brot-pr` branches, commits, pushes, opens the PR; `/brot-merge` lands it).
