@@ -6,7 +6,7 @@ description: Look at the running app with headless-browser eyes via the chrome-d
 # Brot Peek
 
 One job: put the running app's actual state in front of the model — screenshot + console — using
-the chrome-devtools MCP server (registered project-wide in `.mcp.json`, headless + isolated).
+the chrome-devtools MCP server (registered at user scope, headless + isolated).
 
 On entry, print this block:
 
